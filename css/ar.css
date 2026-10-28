@@ -19,6 +19,7 @@
   border-radius: 8px; padding: 9px 11px; cursor: pointer;
 }
 .tabs button[aria-pressed="true"] { background: var(--cold); border-color: var(--cold); color: #04212b; }
+.nav { justify-content: space-between; }
 .msg { font: 500 12px/1.4 var(--mono); color: var(--muted); }
 .msg.err { color: var(--hot); }
 
