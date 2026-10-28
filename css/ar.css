@@ -1,0 +1,27 @@
+/* Fotos (AR): foto ou câmera em tela cheia com os fluxos por cima, painel embaixo com a explicação da foto. */
+#demo, #ar { position: fixed; inset: 0; }
+#demo canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+#ar video { object-fit: cover; }
+
+/* sombra no título para ler em cima da foto */
+.brand h1 { text-shadow: 0 1px 8px rgba(0,0,0,.5); }
+.brand p { text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+.mode { background: color-mix(in srgb, var(--panel) 88%, transparent); }
+
+.card { padding: 14px 16px 12px; }
+.card h2 { margin: 0; font: 700 26px/1.05 var(--display); text-transform: uppercase; text-wrap: balance; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font: 500 12px/1.2 var(--mono); color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 16px; height: 4px; border-radius: 2px; display: inline-block; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tabs button {
+  font: 600 13px/1 var(--body); color: var(--ink); background: transparent; border: 1px solid var(--line);
+  border-radius: 8px; padding: 9px 11px; cursor: pointer;
+}
+.tabs button[aria-pressed="true"] { background: var(--cold); border-color: var(--cold); color: #04212b; }
+.msg { font: 500 12px/1.4 var(--mono); color: var(--muted); }
+.msg.err { color: var(--hot); }
+
+@media (max-width: 640px) {
+  .card h2 { font-size: 22px; }
+}

@@ -1,0 +1,29 @@
+/* Navegação entre as duas páginas: exposta no desktop, dentro do hambúrguer no celular. */
+.brand-row { display: flex; align-items: center; gap: 12px 20px; }
+.pages { position: relative; order: 2; }
+.menu-btn {
+  display: none; align-items: center; justify-content: center; width: 42px; height: 42px; padding: 0; cursor: pointer;
+  background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid #3a535d; border-radius: 12px;
+}
+.menu-btn svg { width: 20px; height: 20px; stroke: var(--ink); }
+.page-links {
+  display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 12px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+}
+.page-links a {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 9px;
+  font: 600 14px/1 var(--body); color: var(--muted); text-decoration: none; white-space: nowrap;
+}
+.page-links a svg { width: 18px; height: 18px; stroke: currentColor; flex: none; }
+.page-links a:hover { color: var(--ink); }
+.page-links a[aria-current="page"] { color: var(--cold); background: color-mix(in srgb, var(--cold) 14%, transparent); }
+@media (max-width: 640px) {
+  .pages { order: 0; }
+  .menu-btn { display: inline-flex; }
+  .page-links {
+    display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 10; min-width: 230px;
+    flex-direction: column; gap: 2px; padding: 6px; background: var(--panel); box-shadow: 0 16px 40px rgba(0,0,0,.5);
+  }
+  .pages.open .page-links { display: flex; }
+  .page-links a { padding: 13px 12px; font-size: 15px; }
+}
