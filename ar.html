@@ -57,6 +57,9 @@
 <script type="module">
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { $ } from "./js/shared/dom.js";
+import { initPageNav } from "./js/shared/page-nav.js";
+import { setHash, onHashChange } from "./js/shared/hash.js";
 
 // ---------- As 4 fotos (mesma ordem do arquivo alvos.mind) ----------
 // Coordenadas em pixels da foto original (474 de largura); z = quanto o fluxo sai da foto, em larguras da foto.
@@ -186,7 +189,6 @@ function buildOverlay(t) {
 }
 
 // ---------- Painel ----------
-const $ = id => document.getElementById(id);
 let current = 0, mode = "demo";
 function showInfo(i, found = true) {
   const t = TARGETS[i];
@@ -339,20 +341,8 @@ window.addEventListener("keydown", e => {
   if (e.key === "ArrowLeft") selectDemo((current + TARGETS.length - 1) % TARGETS.length);
 });
 
-// ---------- Navegação entre páginas (hambúrguer no celular) ----------
-const pages = $("pages");
-$("menu-open").addEventListener("click", e => {
-  e.stopPropagation();
-  $("menu-open").setAttribute("aria-expanded", pages.classList.toggle("open"));
-});
-const closeMenu = () => { pages.classList.remove("open"); $("menu-open").setAttribute("aria-expanded", "false"); };
-// a página atual não recarrega, só fecha o menu
-pages.querySelector("[aria-current=page]").addEventListener("click", e => { e.preventDefault(); closeMenu(); });
-document.addEventListener("click", e => { if (!pages.contains(e.target)) closeMenu(); });
-window.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
-// guarda o passo/foto no endereço, para links diretos (#passo-3, #foto-2...)
-const setHash = key => history.replaceState(null, "", "#" + key);
-window.addEventListener("hashchange", () => route(location.hash));
+initPageNav($("pages"), $("menu-open"));
+onHashChange(route);
 
 const startHash = location.hash; // selectDemo(0) troca o hash, então guarda o do link antes
 selectDemo(0);

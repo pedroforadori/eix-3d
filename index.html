@@ -71,6 +71,9 @@
 <script type="module">
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { $ } from "./js/shared/dom.js";
+import { initPageNav } from "./js/shared/page-nav.js";
+import { setHash, onHashChange } from "./js/shared/hash.js";
 
 // ---------- Passos do tour ----------
 const STEPS = [
@@ -356,7 +359,6 @@ function updateLabels(active) {
 // ---------- Tour ----------
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let step = 0, mode = "steps", tween = null, roofOpacity = 1, ceilOpacity = 1;
-const $ = id => document.getElementById(id);
 const dots = $("dots");
 STEPS.forEach((s, i) => {
   const b = document.createElement("button"); b.setAttribute("aria-label", s.title);
@@ -407,20 +409,8 @@ window.addEventListener("keydown", e => {
   if (e.key === "ArrowLeft") go(step - 1);
 });
 
-// ---------- Navegação entre páginas (hambúrguer no celular) ----------
-const pages = $("pages");
-$("menu-open").addEventListener("click", e => {
-  e.stopPropagation();
-  $("menu-open").setAttribute("aria-expanded", pages.classList.toggle("open"));
-});
-const closeMenu = () => { pages.classList.remove("open"); $("menu-open").setAttribute("aria-expanded", "false"); };
-// a página atual não recarrega, só fecha o menu
-pages.querySelector("[aria-current=page]").addEventListener("click", e => { e.preventDefault(); closeMenu(); });
-document.addEventListener("click", e => { if (!pages.contains(e.target)) closeMenu(); });
-window.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
-// guarda o passo/foto no endereço, para links diretos (#passo-3, #foto-2...)
-const setHash = key => history.replaceState(null, "", "#" + key);
-window.addEventListener("hashchange", () => route(location.hash));
+initPageNav($("pages"), $("menu-open"));
+onHashChange(route);
 
 // ---------- Loop ----------
 const clock = new THREE.Clock();
