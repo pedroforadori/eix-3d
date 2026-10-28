@@ -1,0 +1,533 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tour do resfriamento</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: cena 3D em tela cheia (planta em corte), barra de título em cima, painel do passo embaixo, rótulos presos à cena. */
+:root {
+  color-scheme: dark;
+  --ground: #0b1418;      /* fundo da cena e da página */
+  --panel: #121f25;       /* painel do passo */
+  --line: #24363e;        /* bordas e divisórias */
+  --ink: #e4ecee;         /* texto principal */
+  --muted: #8ea3aa;       /* texto secundário */
+  --cold: #4fd2ff;        /* ar frio */
+  --hot: #ff8a3d;         /* ar quente */
+  --water: #3f8cff;       /* água gelada */
+  --return: #ff4d3d;      /* água de retorno */
+  --outside: #c4d0d6;     /* ar da rua */
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--ground); color: var(--ink);
+  font: 15px/1.5 var(--body); overflow: hidden;
+}
+#stage { position: fixed; inset: 0; }
+#stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+.top {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
+}
+.top > * { pointer-events: auto; }
+.brand h1 {
+  margin: 0; font: 700 26px/1 var(--display); letter-spacing: .02em; text-transform: uppercase;
+}
+.brand p { margin: 4px 0 0; font: 500 11px/1.3 var(--mono); color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+
+.mode { display: flex; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--panel) 85%, transparent); padding: 3px; }
+.mode button {
+  font: 600 13px/1 var(--body); color: var(--muted); background: none; border: 0; border-radius: 999px;
+  padding: 8px 12px; cursor: pointer;
+}
+.mode button[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
+
+.legend {
+  position: fixed; z-index: 4; right: max(16px, env(safe-area-inset-right, 0px)); top: calc(64px + env(safe-area-inset-top, 0px));
+  display: grid; gap: 6px; font: 500 12px/1.2 var(--mono); color: var(--muted);
+  background: color-mix(in srgb, var(--panel) 80%, transparent); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+}
+.legend span { display: flex; align-items: center; gap: 8px; }
+.legend i { width: 18px; height: 4px; border-radius: 2px; display: inline-block; }
+
+.sheet {
+  position: fixed; z-index: 5; left: 0; right: 0; bottom: 0;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
+}
+.card {
+  pointer-events: auto; max-width: 560px; margin: 0 auto;
+  background: color-mix(in srgb, var(--panel) 94%, transparent); border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px 18px 14px; display: grid; gap: 10px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.35);
+}
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.card h2 { margin: 0; font: 700 28px/1.05 var(--display); text-transform: uppercase; letter-spacing: .01em; text-wrap: balance; }
+.card p { margin: 0; color: var(--ink); max-width: 62ch; }
+.temps { display: flex; flex-wrap: wrap; gap: 6px; }
+.temps span {
+  font: 500 12px/1 var(--mono); font-variant-numeric: tabular-nums; padding: 6px 8px; border-radius: 6px;
+  border: 1px solid var(--line); color: var(--ink);
+}
+.temps span b { font-weight: 500; }
+.nav { display: flex; align-items: center; gap: 10px; }
+.dots { display: flex; gap: 6px; flex: 1; justify-content: center; }
+.dots button { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; background: var(--line); cursor: pointer; }
+.dots button[aria-current="true"] { background: var(--ink); width: 22px; border-radius: 4px; }
+.btn {
+  font: 600 14px/1 var(--body); border-radius: 10px; padding: 11px 16px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent; color: var(--ink);
+}
+.btn.primary { background: var(--cold); border-color: var(--cold); color: #04212b; }
+.btn:disabled { opacity: .35; cursor: default; }
+button:focus-visible { outline: 2px solid var(--cold); outline-offset: 2px; }
+.note { font: 400 11px/1.3 var(--mono); color: var(--muted); }
+
+.labels { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.tag {
+  position: absolute; transform: translate(-50%, -100%); white-space: nowrap;
+  font: 600 12px/1 var(--display); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink); background: rgba(11, 20, 24, .72); border: 1px solid var(--line);
+  padding: 5px 7px; border-radius: 5px; transition: opacity .3s;
+}
+.loading { position: fixed; inset: 0; display: grid; place-items: center; font: 500 13px var(--mono); color: var(--muted); }
+
+@media (max-width: 640px) {
+  .brand h1 { font-size: 21px; }
+  .legend { top: calc(104px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 11px; padding: 7px 10px; }
+  .card h2 { font-size: 23px; }
+  .card { padding: 14px 14px 12px; }
+  .card p { font-size: 14px; }
+}
+</style>
+
+<div id="stage"></div>
+<div class="loading" id="loading">Carregando a cena 3D...</div>
+<div class="labels" id="labels"></div>
+
+<header class="top">
+  <div class="brand">
+    <h1>Tour do resfriamento</h1>
+    <p>Protótipo · data center · <a href="ar.html" style="color:inherit">Ver nas fotos (AR)</a></p>
+  </div>
+  <div class="mode" role="group" aria-label="Modo de visualização">
+    <button id="mode-steps" aria-pressed="true">Passo a passo</button>
+    <button id="mode-all" aria-pressed="false">Ciclo completo</button>
+  </div>
+</header>
+
+<div class="legend" aria-label="Legenda">
+  <span><i style="background:var(--outside)"></i>Ar da rua</span>
+  <span><i style="background:var(--cold)"></i>Ar frio</span>
+  <span><i style="background:var(--hot)"></i>Ar quente</span>
+  <span><i style="background:var(--water)"></i>Água gelada</span>
+  <span><i style="background:var(--return)"></i>Água de retorno</span>
+</div>
+
+<section class="sheet">
+  <div class="card" aria-live="polite">
+    <div class="eyebrow" id="eyebrow">Visão geral</div>
+    <h2 id="title">Como o data center se mantém frio</h2>
+    <p id="text"></p>
+    <div class="temps" id="temps"></div>
+    <div class="nav">
+      <button class="btn" id="prev">Anterior</button>
+      <div class="dots" id="dots"></div>
+      <button class="btn primary" id="next">Próximo</button>
+    </div>
+    <div class="note">Arraste para girar · pinça ou roda para aproximar · temperaturas típicas, ilustrativas</div>
+  </div>
+</section>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+// ---------- Passos do tour ----------
+const STEPS = [
+  {
+    eyebrow: "Visão geral", title: "Como o data center se mantém frio",
+    text: "O calor dos servidores faz um ciclo: sai pelos racks, volta para o ar-condicionado da sala, passa para a água e é jogado para fora pelo chiller no telhado. Toque em Próximo para seguir o caminho.",
+    temps: [], flows: ["outside", "water", "floor", "racks", "return"],
+    cam: [15, 9, 17], target: [-0.5, 3, 0], roof: true, labels: ["chiller", "crah", "cold", "hot", "floor"],
+  },
+  {
+    eyebrow: "Passo 1 de 5", title: "Chiller no telhado",
+    text: "Os ventiladores em cima puxam o ar da rua pelas serpentinas em V nas laterais. Esse ar leva embora o calor da água e sai quente por cima da máquina.",
+    temps: [["Ar da rua", "≈ 30 °C"], ["Saída dos ventiladores", "≈ 40 °C"]], flows: ["outside"],
+    cam: [9, 11.5, 11], target: [0, 6.4, 0], roof: true, labels: ["chiller"],
+  },
+  {
+    eyebrow: "Passo 2 de 5", title: "Água gelada desce para a sala",
+    text: "A água sai gelada do chiller, desce pela tubulação até o ar-condicionado da sala (CRAH) e volta mais quente, trazendo o calor que tirou do ar.",
+    temps: [["Ida", "≈ 7 °C"], ["Retorno", "≈ 12 °C"]], flows: ["water"],
+    cam: [1, 8, 10], target: [-5.5, 4, -0.8], roof: true, labels: ["chiller", "crah"],
+  },
+  {
+    eyebrow: "Passo 3 de 5", title: "Ar frio por baixo do piso",
+    text: "O CRAH sopra o ar frio para baixo do piso elevado. O ar corre pelo vão e sobe pelas placas perfuradas no corredor frio, bem na frente dos servidores.",
+    temps: [["Saída do CRAH", "≈ 18 °C"], ["Corredor frio", "≈ 22 °C"]], flows: ["floor"],
+    cam: [5, 7.5, 11], target: [-2, 0.6, 0], roof: false, ceil: false, labels: ["crah", "floor", "cold"],
+  },
+  {
+    eyebrow: "Passo 4 de 5", title: "O ar passa pelos servidores",
+    text: "Os servidores puxam o ar frio pela frente e soltam pela parte de trás. É aqui que o ar esquenta e vai para o corredor quente, que fica fechado.",
+    temps: [["Entrada dos racks", "≈ 22 °C"], ["Corredor quente", "≈ 35 °C"]], flows: ["racks"],
+    cam: [4, 8, 6], target: [0.5, 1.2, 0], roof: false, ceil: false, labels: ["cold", "hot"],
+  },
+  {
+    eyebrow: "Passo 5 de 5", title: "Ar quente volta pelo forro",
+    text: "O ar quente sobe pelas grelhas do forro e corre por cima até o CRAH, que passa o calor para a água. A água leva o calor ao chiller, e o ciclo recomeça.",
+    temps: [["Retorno ao CRAH", "≈ 35 °C"], ["Água de volta", "≈ 12 °C"]], flows: ["return", "water"],
+    cam: [6, 7, 10], target: [-2.5, 2.8, 0], roof: false, labels: ["hot", "crah"],
+  },
+];
+
+// ---------- Cena ----------
+const stage = document.getElementById("stage");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x0b1418);
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x0b1418, 30, 60);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(...STEPS[0].cam.map((c, i) => window.innerWidth < window.innerHeight * 0.8 ? STEPS[0].target[i] + (c - STEPS[0].target[i]) * 1.6 : c));
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(...STEPS[0].target);
+controls.enableDamping = true;
+controls.maxPolarAngle = Math.PI * 0.49;
+controls.minDistance = 3; controls.maxDistance = 40;
+
+scene.add(new THREE.HemisphereLight(0xcfe3ea, 0x0b1418, 1.1));
+const sun = new THREE.DirectionalLight(0xffffff, 1.4);
+sun.position.set(8, 16, 10);
+scene.add(sun);
+
+const roofMats = [];
+const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, metalness: 0.1, ...extra });
+const glass = (color, opacity) => new THREE.MeshStandardMaterial({ color, transparent: true, opacity, depthWrite: false, side: THREE.DoubleSide, roughness: 0.4 });
+function box(w, h, d, material, x, y, z) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+  m.position.set(x, y, z); scene.add(m); return m;
+}
+
+// Prédio em corte: laje, piso elevado (60 cm), sala, forro, entreforro e telhado.
+const FLOOR = 0.6, CEIL = 3.6, ROOF = 4.6;
+box(18, 0.2, 11, mat(0x1a2a31), 0, -0.1, 0);
+const roofSlab = box(18, 0.25, 11, glass(0x55707a, 0.18), 0, ROOF + 0.12, 0);
+box(0.15, ROOF, 11, glass(0x55707a, 0.12), -8.5, ROOF / 2, 0);
+box(18, ROOF, 0.15, glass(0x55707a, 0.1), 0, ROOF / 2, -5.5);
+box(16.5, 0.04, 10, glass(0x9fb4bb, 0.22), -0.2, FLOOR, 0);
+const grid = new THREE.GridHelper(16.8, 28, 0x3a5560, 0x2a3f47);
+grid.position.set(-0.2, FLOOR + 0.03, 0); scene.add(grid);
+const ceilMats = [];
+const ceilSlab = box(16.5, 0.04, 10, glass(0x9fb4bb, 0.12), -0.2, CEIL, 0); ceilMats.push([ceilSlab.material, 0.12]);
+// pedestais do piso elevado
+for (let x = -8; x <= 7.6; x += 1.2) for (let z = -4.6; z <= 4.6; z += 1.2) box(0.06, FLOOR, 0.06, mat(0x2d434b), x, FLOOR / 2, z);
+
+// Placas perfuradas no corredor frio e grelhas de retorno no forro
+const perf = glass(0x4fd2ff, 0.35);
+for (let x = -4.2; x <= 5.4; x += 0.6) box(0.56, 0.05, 1.1, perf, x, FLOOR + 0.03, 0);
+const grille = glass(0xff8a3d, 0.3); ceilMats.push([grille, 0.3]);
+for (const z of [-2.55, 2.55]) for (let x = -4.2; x <= 5.4; x += 1.2) box(1.1, 0.05, 0.56, grille, x, CEIL, z);
+
+// CRAH (ar-condicionado de precisão da sala), insuflamento por baixo
+box(1.2, 2.6, 3.8, mat(0x39474d, { roughness: 0.6 }), -7.4, FLOOR + 1.3, 0);
+box(0.02, 0.5, 0.8, mat(0x4fd2ff, { emissive: 0x0b4a5c }), -6.79, FLOOR + 2.1, 0.8);
+box(1.2, 1.0, 3.8, glass(0x8aa0a8, 0.25), -7.4, CEIL + 0.5, 0); // duto de retorno até o entreforro
+
+// Racks: duas fileiras com as frentes viradas para o corredor frio
+const rackMat = new THREE.MeshStandardMaterial({ color: 0x151b1e, transparent: true, opacity: 0.6, roughness: 0.5, depthWrite: false });
+const ledMat = mat(0x4fd2ff, { emissive: 0x1f8fb0 });
+for (const side of [-1, 1]) {
+  for (let i = 0; i < 10; i++) {
+    const x = -4.5 + i * 1.0;
+    box(0.92, 2.2, 1.1, rackMat, x, FLOOR + 1.1, side * 1.3);
+    for (let k = 0; k < 5; k++) box(0.6, 0.02, 0.01, ledMat, x, FLOOR + 0.4 + k * 0.4, side * 0.745);
+  }
+  // confinamento do corredor quente
+  box(10.6, CEIL - FLOOR, 0.04, glass(0xff8a3d, 0.07), 0.05, (CEIL + FLOOR) / 2, side * 3.2);
+  box(0.04, CEIL - FLOOR, 1.35, glass(0xff8a3d, 0.1), 5.4, (CEIL + FLOOR) / 2, side * 2.53);
+}
+
+// Chillers resfriados a ar no telhado
+const fans = [];
+function chiller(cx) {
+  const base = ROOF + 0.25;
+  const start = scene.children.length;
+  box(5, 0.9, 2.2, mat(0x6f7b80, { metalness: 0.3 }), cx, base + 0.45, 0);
+  const coil = mat(0x9aa6ab, { metalness: 0.4, roughness: 0.5 });
+  const coilFace = new THREE.MeshStandardMaterial({ color: 0x4a585e, side: THREE.DoubleSide, metalness: 0.2 });
+  for (let i = 0; i < 4; i++) {
+    const x = cx - 1.875 + i * 1.25;
+    for (const s of [-1, 1]) {
+      // serpentina em V: duas faces inclinadas
+      const p = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.6), coilFace);
+      p.position.set(x, base + 1.7, s * 0.85); p.rotation.x = s * 0.35; scene.add(p);
+    }
+    box(0.05, 1.6, 2.2, coil, x - 0.62, base + 1.7, 0);
+    // ventilador
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.3, 24, 1, true), mat(0x58656a, { side: THREE.DoubleSide }));
+    ring.position.set(x, base + 2.65, 0); scene.add(ring);
+    const fan = new THREE.Group();
+    for (let b = 0; b < 4; b++) {
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.02, 0.16), mat(0x2b3438));
+      blade.rotation.y = (b * Math.PI) / 4; blade.rotation.x = 0.25; fan.add(blade);
+    }
+    fan.position.set(x, base + 2.65, 0); scene.add(fan); fans.push(fan);
+  }
+  box(5, 0.08, 2.2, mat(0x6f7b80), cx, base + 2.5, 0);
+  for (const o of scene.children.slice(start)) o.traverse(m => {
+    if (m.material && !roofMats.includes(m.material)) { m.material.transparent = true; roofMats.push(m.material); }
+  });
+}
+chiller(-3); chiller(3.2);
+
+// ---------- Fluxos (partículas ao longo de curvas) ----------
+const C = {
+  outside: new THREE.Color(0xc4d0d6), cold: new THREE.Color(0x4fd2ff), hot: new THREE.Color(0xff8a3d),
+  water: new THREE.Color(0x3f8cff), ret: new THREE.Color(0xff4d3d),
+};
+const sprite = (() => {
+  const c = document.createElement("canvas"); c.width = c.height = 64;
+  const g = c.getContext("2d"); const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(0.35, "rgba(255,255,255,.7)"); r.addColorStop(1, "rgba(255,255,255,0)");
+  g.fillStyle = r; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+})();
+
+const groups = {};
+function flowGroup(name, { size = 0.16, speed = 1.6, perUnit = 3.2 } = {}) {
+  groups[name] = { name, paths: [], size: size * 1.7, speed, perUnit: perUnit * 1.6, opacity: 1, target: 1 };
+  return groups[name];
+}
+// path: pontos, cor inicial, cor final, faixa da transição [a, b]
+function addPath(group, pts, c0, c1, range = [0.4, 0.6]) {
+  const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)), false, "centripetal");
+  const len = curve.getLength();
+  const lut = curve.getSpacedPoints(240);
+  group.paths.push({ curve, len, lut, c0, c1, range, count: Math.max(6, Math.round(len * group.perUnit)) });
+}
+
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+// 1) Ar da rua entrando pelas serpentinas e saindo quente pelos ventiladores
+const gOut = flowGroup("outside", { perUnit: 2.4 });
+for (const cx of [-3, 3.2]) for (const s of [-1, 1]) for (let i = 0; i < 4; i++) {
+  const dx = -1.875 + i * 1.25 + rnd(-0.25, 0.25), y0 = ROOF + rnd(0.9, 2.0);
+  addPath(gOut, [[cx + dx, y0, s * 4], [cx + dx, ROOF + 1.7, s * 1.25], [cx + dx, ROOF + 2.0, s * 0.35],
+    [cx + dx + rnd(-0.1, 0.1), ROOF + 2.9, 0], [cx + dx + rnd(-0.4, 0.4), ROOF + 5.6, rnd(-0.4, 0.4)]], C.outside, C.hot, [0.42, 0.62]);
+}
+
+// 2) Água gelada (ida) e de retorno entre chillers e CRAH
+const gWater = flowGroup("water", { size: 0.14, speed: 1.4, perUnit: 2.6 });
+const pipeY = ROOF + 0.55;
+for (const cx of [-3, 3.2]) {
+  const sup = [[cx - 2.5, pipeY, -0.7], [cx - 2.6, pipeY, -1.4], [-7.6, pipeY, -1.4], [-7.6, CEIL + 0.3, -1.4], [-7.6, FLOOR + 2.7, -1.4]];
+  const ret = [[-7.2, FLOOR + 2.7, -1.75], [-7.2, CEIL + 0.3, -1.75], [-7.2, pipeY + 0.25, -1.75], [cx - 2.4, pipeY + 0.25, -1.75], [cx - 2.4, pipeY + 0.25, -0.9]];
+  addPath(gWater, sup, C.water, C.water);
+  addPath(gWater, ret, C.ret, C.ret);
+  for (const [pts, col] of [[sup, 0x2a63c4], [ret, 0xc23a2e]]) {
+    const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)), false, "catmullrom", 0.05);
+    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 0.07, 10), mat(col, { metalness: 0.5, roughness: 0.4 }));
+    scene.add(tube);
+  }
+}
+
+// 3) Ar frio: CRAH -> vão do piso -> placas perfuradas -> corredor frio
+const gFloor = flowGroup("floor", { perUnit: 2.6 });
+for (let i = 0; i < 14; i++) {
+  const xt = -4.2 + (i / 13) * 9.6, zt = rnd(-0.4, 0.4), zs = rnd(-1.3, 1.3);
+  addPath(gFloor, [[-6.85, FLOOR + rnd(0.6, 1.8), zs], [-7.0, 0.3, zs], [-5.8, 0.25, zs * 0.6], [xt - 0.6, 0.28, zt],
+    [xt, FLOOR + 0.05, zt], [xt + rnd(-0.1, 0.1), FLOOR + rnd(1.2, 2.0), zt * 0.6]], C.cold, C.cold);
+}
+
+// 4) Pelos racks: frente (corredor frio) -> trás (corredor quente)
+const gRacks = flowGroup("racks", { perUnit: 3.4, speed: 1.1 });
+for (const s of [-1, 1]) for (let i = 0; i < 10; i++) {
+  const x = -4.5 + i * 1.0 + rnd(-0.2, 0.2), y = FLOOR + rnd(0.5, 2.0);
+  addPath(gRacks, [[x, y - 0.3, s * 0.15], [x, y, s * 0.7], [x, y, s * 1.3], [x, y + 0.05, s * 1.9], [x, y + 0.6, s * 2.6]], C.cold, C.hot, [0.35, 0.68]);
+}
+
+// 5) Retorno quente: corredor quente -> forro -> entreforro -> CRAH
+const gRet = flowGroup("return", { perUnit: 2.2 });
+for (const s of [-1, 1]) for (let i = 0; i < 7; i++) {
+  const x = -4.2 + i * 1.5 + rnd(-0.3, 0.3);
+  addPath(gRet, [[x, FLOOR + 1.6, s * 2.6], [x, CEIL - 0.2, s * 2.55], [x - 0.4, CEIL + 0.45, s * 2.3],
+    [-5.5, CEIL + 0.5, s * rnd(0.6, 1.4)], [-7.3, CEIL + 0.3, s * rnd(0.3, 1.2)], [-7.3, FLOOR + 2.4, s * rnd(0.3, 1.2)]], C.hot, C.hot);
+}
+
+// Constrói um Points por grupo
+for (const g of Object.values(groups)) {
+  let n = 0; for (const p of g.paths) n += p.count;
+  const pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  g.material = new THREE.PointsMaterial({ size: g.size, map: sprite, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true });
+  g.points = new THREE.Points(geo, g.material); g.points.frustumCulled = false; g.points.renderOrder = 10; scene.add(g.points);
+  // trilhas tênues
+  g.lines = g.paths.map(p => {
+    const lg = new THREE.BufferGeometry().setFromPoints(p.lut);
+    const lm = new THREE.LineBasicMaterial({ color: p.c0.clone().lerp(p.c1, 0.5), transparent: true, opacity: 0.2, depthWrite: false });
+    const l = new THREE.Line(lg, lm); scene.add(l); return l;
+  });
+  g.seeds = []; for (const p of g.paths) for (let k = 0; k < p.count; k++) g.seeds.push({ p, off: k / p.count + rnd(0, 0.5 / p.count) });
+}
+
+const tmp = new THREE.Color();
+function updateFlows(t, dt) {
+  for (const g of Object.values(groups)) {
+    g.opacity += (g.target - g.opacity) * Math.min(1, dt * 4);
+    g.material.opacity = g.opacity;
+    for (const l of g.lines) l.material.opacity = 0.2 * g.opacity;
+    const pos = g.points.geometry.attributes.position.array, col = g.points.geometry.attributes.color.array;
+    g.seeds.forEach((s, i) => {
+      const p = s.p, u = (s.off + (t * g.speed) / p.len) % 1;
+      const f = u * (p.lut.length - 1), i0 = Math.floor(f), a = p.lut[i0], b = p.lut[Math.min(i0 + 1, p.lut.length - 1)], w = f - i0;
+      pos[i * 3] = a.x + (b.x - a.x) * w; pos[i * 3 + 1] = a.y + (b.y - a.y) * w; pos[i * 3 + 2] = a.z + (b.z - a.z) * w;
+      const k = THREE.MathUtils.clamp((u - p.range[0]) / (p.range[1] - p.range[0]), 0, 1);
+      const fade = Math.min(1, u * 8, (1 - u) * 8); // nasce e some suavemente
+      tmp.copy(p.c0).lerp(p.c1, k).multiplyScalar(fade);
+      col[i * 3] = tmp.r; col[i * 3 + 1] = tmp.g; col[i * 3 + 2] = tmp.b;
+    });
+    g.points.geometry.attributes.position.needsUpdate = true;
+    g.points.geometry.attributes.color.needsUpdate = true;
+  }
+}
+
+// ---------- Rótulos presos à cena ----------
+const LABELS = {
+  chiller: ["Chiller", [0.1, ROOF + 3.6, 0]],
+  crah: ["CRAH", [-7.4, FLOOR + 2.9, 1.2]],
+  cold: ["Corredor frio", [3, FLOOR + 2.5, 0]],
+  hot: ["Corredor quente", [3, FLOOR + 2.7, 2.6]],
+  floor: ["Piso elevado", [-5.6, 0.2, 3.5]],
+};
+const labelLayer = document.getElementById("labels");
+const labelEls = {};
+for (const [k, [txt]] of Object.entries(LABELS)) {
+  const el = document.createElement("div"); el.className = "tag"; el.textContent = txt; el.style.opacity = 0;
+  labelLayer.appendChild(el); labelEls[k] = el;
+}
+const v = new THREE.Vector3();
+function updateLabels(active) {
+  for (const [k, [, p]] of Object.entries(LABELS)) {
+    const el = labelEls[k];
+    v.set(...p).project(camera);
+    const on = active.includes(k) && v.z < 1;
+    el.style.opacity = on ? 1 : 0;
+    el.style.left = ((v.x + 1) / 2) * window.innerWidth + "px";
+    el.style.top = ((1 - v.y) / 2) * window.innerHeight + "px";
+  }
+}
+
+// ---------- Tour ----------
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let step = 0, mode = "steps", tween = null, roofOpacity = 1, ceilOpacity = 1;
+const $ = id => document.getElementById(id);
+const dots = $("dots");
+STEPS.forEach((s, i) => {
+  const b = document.createElement("button"); b.setAttribute("aria-label", s.title);
+  b.addEventListener("click", () => go(i)); dots.appendChild(b);
+});
+
+function flyTo(cam, target) {
+  // celular em pé: afasta a câmera para caber a cena
+  if (camera.aspect < 0.8) cam = cam.map((c, i) => target[i] + (c - target[i]) * 1.6);
+  if (reduce) { camera.position.set(...cam); controls.target.set(...target); return; }
+  tween = { t: 0, p0: camera.position.clone(), t0: controls.target.clone(), p1: new THREE.Vector3(...cam), t1: new THREE.Vector3(...target) };
+}
+function go(i) {
+  step = Math.max(0, Math.min(STEPS.length - 1, i));
+  const s = STEPS[step];
+  $("eyebrow").textContent = s.eyebrow; $("title").textContent = s.title; $("text").textContent = s.text;
+  $("temps").innerHTML = s.temps.map(([a, b]) => `<span>${a} <b>${b}</b></span>`).join("");
+  $("prev").disabled = step === 0;
+  $("next").textContent = step === STEPS.length - 1 ? "Recomeçar" : "Próximo";
+  [...dots.children].forEach((d, k) => d.setAttribute("aria-current", k === step ? "true" : "false"));
+  applyFlows(); flyTo(s.cam, s.target);
+}
+function applyFlows() {
+  const active = mode === "all" ? Object.keys(groups) : STEPS[step].flows;
+  for (const g of Object.values(groups)) g.target = active.includes(g.name) ? 1 : 0.07;
+}
+$("prev").addEventListener("click", () => go(step - 1));
+$("next").addEventListener("click", () => go(step === STEPS.length - 1 ? 0 : step + 1));
+function setMode(m) {
+  mode = m;
+  $("mode-steps").setAttribute("aria-pressed", m === "steps"); $("mode-all").setAttribute("aria-pressed", m === "all");
+  if (m === "all") flyTo(STEPS[0].cam, STEPS[0].target);
+  applyFlows();
+}
+$("mode-steps").addEventListener("click", () => setMode("steps"));
+$("mode-all").addEventListener("click", () => setMode("all"));
+controls.addEventListener("start", () => { tween = null; });
+window.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") go(step + 1);
+  if (e.key === "ArrowLeft") go(step - 1);
+});
+
+// ---------- Loop ----------
+const clock = new THREE.Clock();
+let t = 0;
+function frame() {
+  const raw = clock.getDelta(), dt = Math.min(raw, 0.05); t += dt;
+  if (tween) {
+    tween.t = Math.min(1, tween.t + Math.min(raw, 0.25) / 1.3);
+    const e = tween.t < 0.5 ? 4 * tween.t ** 3 : 1 - (-2 * tween.t + 2) ** 3 / 2;
+    camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.t0, tween.t1, e);
+    if (tween.t >= 1) tween = null;
+  }
+  for (const f of fans) f.rotation.y += dt * 9;
+  const roofTarget = mode === "all" || STEPS[step].roof ? 1 : 0.06;
+  roofOpacity += (roofTarget - roofOpacity) * Math.min(1, dt * 4);
+  for (const m of roofMats) { m.opacity = roofOpacity; m.depthWrite = roofOpacity > 0.9; }
+  roofSlab.material.opacity = 0.18 * roofOpacity;
+  const ceilTarget = mode === "all" || STEPS[step].ceil !== false ? 1 : 0.05;
+  ceilOpacity += (ceilTarget - ceilOpacity) * Math.min(1, dt * 4);
+  for (const [m, o] of ceilMats) m.opacity = o * ceilOpacity;
+  updateFlows(t, dt);
+  controls.update();
+  renderer.render(scene, camera);
+  updateLabels(mode === "all" ? Object.keys(LABELS) : STEPS[step].labels);
+  requestAnimationFrame(frame);
+}
+function resize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  // no celular em pé, afasta a câmera para caber a planta
+  camera.fov = camera.aspect < 0.8 ? 62 : 45;
+  // sobe a cena para não ficar escondida atrás do painel do passo
+  const card = document.querySelector(".card");
+  const shift = card ? card.getBoundingClientRect().height * 0.42 : 0;
+  camera.setViewOffset(window.innerWidth, window.innerHeight, 0, shift, window.innerWidth, window.innerHeight);
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener("resize", resize);
+resize();
+go(0);
+$("loading").hidden = true;
+frame();
+</script>
