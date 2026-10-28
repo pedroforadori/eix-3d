@@ -1,3 +1,6 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tour do resfriamento</title>
@@ -105,23 +108,65 @@ button:focus-visible { outline: 2px solid var(--cold); outline-offset: 2px; }
 }
 .loading { position: fixed; inset: 0; display: grid; place-items: center; font: 500 13px var(--mono); color: var(--muted); }
 
+/* Navegação entre as duas páginas: exposta no desktop, dentro do hambúrguer no celular (igual nas duas páginas). */
+.brand-row { display: flex; align-items: center; gap: 12px 20px; }
+.pages { position: relative; order: 2; }
+.menu-btn {
+  display: none; align-items: center; justify-content: center; width: 42px; height: 42px; padding: 0; cursor: pointer;
+  background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid #3a535d; border-radius: 12px;
+}
+.menu-btn svg { width: 20px; height: 20px; stroke: var(--ink); }
+.page-links {
+  display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 12px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+}
+.page-links a {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 9px;
+  font: 600 14px/1 var(--body); color: var(--muted); text-decoration: none; white-space: nowrap;
+}
+.page-links a svg { width: 18px; height: 18px; stroke: currentColor; flex: none; }
+.page-links a:hover { color: var(--ink); }
+.page-links a[aria-current="page"] { color: var(--cold); background: color-mix(in srgb, var(--cold) 14%, transparent); }
+a:focus-visible { outline: 2px solid var(--cold); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .pages { order: 0; }
+  .menu-btn { display: inline-flex; }
+  .page-links {
+    display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 10; min-width: 230px;
+    flex-direction: column; gap: 2px; padding: 6px; background: var(--panel); box-shadow: 0 16px 40px rgba(0,0,0,.5);
+  }
+  .pages.open .page-links { display: flex; }
+  .page-links a { padding: 13px 12px; font-size: 15px; }
+}
+
 @media (max-width: 640px) {
   .brand h1 { font-size: 21px; }
-  .legend { top: calc(104px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 11px; padding: 7px 10px; }
+  .legend { top: calc(112px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 11px; padding: 7px 10px; }
   .card h2 { font-size: 23px; }
   .card { padding: 14px 14px 12px; }
   .card p { font-size: 14px; }
 }
 </style>
+</head>
+<body>
 
 <div id="stage"></div>
 <div class="loading" id="loading">Carregando a cena 3D...</div>
 <div class="labels" id="labels"></div>
 
 <header class="top">
-  <div class="brand">
-    <h1>Tour do resfriamento</h1>
-    <p>Protótipo · data center · <a href="ar.html" style="color:inherit">Ver nas fotos (AR)</a></p>
+  <div class="brand-row">
+    <nav class="pages" id="pages" aria-label="Páginas">
+      <button class="menu-btn" id="menu-open" aria-label="Menu" aria-expanded="false" aria-controls="page-links"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="page-links" id="page-links">
+        <a href="index.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linejoin="round"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg>Tour 3D</a>
+        <a href="ar.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg>Nas fotos (AR)</a>
+      </div>
+    </nav>
+    <div class="brand">
+      <h1>Tour do resfriamento</h1>
+      <p>Protótipo · data center</p>
+    </div>
   </div>
   <div class="mode" role="group" aria-label="Modo de visualização">
     <button id="mode-steps" aria-pressed="true">Passo a passo</button>
@@ -151,6 +196,7 @@ button:focus-visible { outline: 2px solid var(--cold); outline-offset: 2px; }
     <div class="note">Arraste para girar · pinça ou roda para aproximar · temperaturas típicas, ilustrativas</div>
   </div>
 </section>
+
 
 <script type="importmap">
 { "imports": {
@@ -468,6 +514,7 @@ function go(i) {
   $("next").textContent = step === STEPS.length - 1 ? "Recomeçar" : "Próximo";
   [...dots.children].forEach((d, k) => d.setAttribute("aria-current", k === step ? "true" : "false"));
   applyFlows(); flyTo(s.cam, s.target);
+  setHash(mode === "all" ? "ciclo" : "passo-" + step);
 }
 function applyFlows() {
   const active = mode === "all" ? Object.keys(groups) : STEPS[step].flows;
@@ -480,6 +527,13 @@ function setMode(m) {
   $("mode-steps").setAttribute("aria-pressed", m === "steps"); $("mode-all").setAttribute("aria-pressed", m === "all");
   if (m === "all") flyTo(STEPS[0].cam, STEPS[0].target);
   applyFlows();
+  setHash(m === "all" ? "ciclo" : "passo-" + step);
+}
+// #passo-0 a #passo-5 ou #ciclo, vindos do menu ou de um link direto
+function route(h) {
+  const m = /^#passo-([0-5])$/.exec(h);
+  if (h === "#ciclo") setMode("all");
+  else if (m) { setMode("steps"); go(+m[1]); }
 }
 $("mode-steps").addEventListener("click", () => setMode("steps"));
 $("mode-all").addEventListener("click", () => setMode("all"));
@@ -488,6 +542,21 @@ window.addEventListener("keydown", e => {
   if (e.key === "ArrowRight") go(step + 1);
   if (e.key === "ArrowLeft") go(step - 1);
 });
+
+// ---------- Navegação entre páginas (hambúrguer no celular) ----------
+const pages = $("pages");
+$("menu-open").addEventListener("click", e => {
+  e.stopPropagation();
+  $("menu-open").setAttribute("aria-expanded", pages.classList.toggle("open"));
+});
+const closeMenu = () => { pages.classList.remove("open"); $("menu-open").setAttribute("aria-expanded", "false"); };
+// a página atual não recarrega, só fecha o menu
+pages.querySelector("[aria-current=page]").addEventListener("click", e => { e.preventDefault(); closeMenu(); });
+document.addEventListener("click", e => { if (!pages.contains(e.target)) closeMenu(); });
+window.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+// guarda o passo/foto no endereço, para links diretos (#passo-3, #foto-2...)
+const setHash = key => history.replaceState(null, "", "#" + key);
+window.addEventListener("hashchange", () => route(location.hash));
 
 // ---------- Loop ----------
 const clock = new THREE.Clock();
@@ -526,8 +595,12 @@ function resize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 window.addEventListener("resize", resize);
+const startHash = location.hash; // go(0) troca o hash, então guarda o do link antes
 resize();
 go(0);
+route(startHash);
 $("loading").hidden = true;
 frame();
 </script>
+</body>
+</html>
