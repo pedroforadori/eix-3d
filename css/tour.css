@@ -32,8 +32,18 @@
 }
 .loading { position: fixed; inset: 0; display: grid; place-items: center; font: 500 13px var(--mono); color: var(--muted); }
 
+.legend-btn { display: none; }
+
 @media (max-width: 640px) {
-  .legend { top: calc(112px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 11px; padding: 7px 10px; }
-  .card h2 { font-size: 23px; }
-  .card { padding: 14px 14px 12px; }
+  /* legenda vira um botão no topo; abre como balão */
+  .legend-btn {
+    display: grid; place-items: center; flex: none; width: 42px; height: 42px; padding: 0; cursor: pointer;
+    background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid #3a535d; border-radius: 50%;
+  }
+  .legend-btn svg { width: 20px; height: 20px; }
+  .legend { display: none; top: calc(66px + env(safe-area-inset-top, 0px)); z-index: 6; background: var(--panel); box-shadow: 0 16px 40px rgba(0,0,0,.5); padding: 12px 14px; }
+  .legend.open { display: grid; }
+  .note { display: none; }
+  .card { padding: 12px 14px; }
+  .card h2 { font-size: 21px; }
 }

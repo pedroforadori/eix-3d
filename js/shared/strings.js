@@ -9,6 +9,7 @@ export const STRINGS = {
   prev: { pt: "Anterior", en: "Previous" },
   next: { pt: "Próximo", en: "Next" },
   restart: { pt: "Recomeçar", en: "Start over" },
+  details: { pt: "Mostrar detalhes", en: "Show details" },
 
   // tour 3D
   tourDocTitle: { pt: "Tour do resfriamento", en: "Cooling tour" },

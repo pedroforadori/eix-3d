@@ -2,7 +2,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { $ } from "../shared/dom.js";
-import { initPageNav } from "../shared/page-nav.js";
+import { initPageNav, initPopover } from "../shared/page-nav.js";
+import { initCard } from "../shared/card.js";
 import { setHash, onHashChange } from "../shared/hash.js";
 import { initI18n, onLangChange } from "../shared/i18n.js";
 import { STRINGS } from "../shared/strings.js";
@@ -76,7 +77,8 @@ window.addEventListener("keydown", e => {
 });
 initPageNav($("pages"), $("menu-open"));
 onHashChange(route);
-onLangChange(() => { panel.refresh(); labels.relabel(); resize(); });
+initPopover($("legend"), $("legend-btn"));
+onLangChange(() => { panel.refresh(); labels.relabel(); }); // a altura nova do painel reenquadra via initCard
 
 // ---------- Loop ----------
 const clock = new THREE.Clock();
@@ -93,10 +95,11 @@ function frame() {
   requestAnimationFrame(frame);
 }
 function resize() {
-  rig.fit(document.querySelector(".card"));
+  rig.fit();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 window.addEventListener("resize", resize);
+initCard($("card"), $("card-head"), $("card-toggle"), resize);
 const startHash = location.hash; // go(0) troca o hash, então guarda o do link antes
 resize();
 go(0);

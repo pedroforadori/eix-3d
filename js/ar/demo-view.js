@@ -2,6 +2,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GROUND } from "../shared/palette.js";
+import { freeArea } from "../shared/dom.js";
 import { buildOverlay } from "./overlay.js";
 
 // Mesma interface do modo câmera (start/stop), mais show(i) para trocar a foto e resize().
@@ -34,8 +35,8 @@ export function createDemoView(el, targets) {
   function frame() {
     const t = targets[current], aspect = window.innerWidth / window.innerHeight;
     const hImg = t.h / t.w;
-    // distância para a foto caber acima do painel
-    const fit = Math.max(hImg / 0.62, 1 / (0.92 * aspect));
+    // distância para a foto caber na faixa livre entre o topo e o painel
+    const fit = Math.max(hImg / (0.9 * freeArea().frac), 1 / (0.92 * aspect));
     const dist = (fit / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     camera.position.set(0, -0.05, dist); controls.target.set(0, 0, 0); userMoved = false;
   }
@@ -45,9 +46,7 @@ export function createDemoView(el, targets) {
   }
   function resize() {
     camera.aspect = window.innerWidth / window.innerHeight;
-    const card = document.querySelector(".card");
-    const shift = card ? card.getBoundingClientRect().height * 0.5 : 0;
-    camera.setViewOffset(window.innerWidth, window.innerHeight, 0, shift, window.innerWidth, window.innerHeight);
+    camera.setViewOffset(window.innerWidth, window.innerHeight, 0, freeArea().shift, window.innerWidth, window.innerHeight);
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     frame();

@@ -24,5 +24,6 @@
 .msg.err { color: var(--hot); }
 
 @media (max-width: 640px) {
-  .card h2 { font-size: 22px; }
+  .card { padding: 12px 14px; }
+  .card h2 { font-size: 21px; }
 }

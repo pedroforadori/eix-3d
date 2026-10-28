@@ -1,6 +1,7 @@
 // Fotos (AR): conecta o painel e os dois modos, sem câmera (demo) e com câmera (MindAR).
 import { $ } from "../shared/dom.js";
 import { initPageNav } from "../shared/page-nav.js";
+import { initCard } from "../shared/card.js";
 import { setHash, onHashChange } from "../shared/hash.js";
 import { initI18n, onLangChange } from "../shared/i18n.js";
 import { STRINGS } from "../shared/strings.js";
@@ -62,7 +63,8 @@ window.addEventListener("keydown", e => {
 });
 initPageNav($("pages"), $("menu-open"));
 onHashChange(route);
-onLangChange(() => { panel.refresh(); views.demo.resize(); });
+onLangChange(() => panel.refresh()); // a altura nova do painel reenquadra via initCard
+initCard($("card"), $("card-head"), $("card-toggle"), () => views.demo.resize());
 
 const startHash = location.hash; // select(0) troca o hash, então guarda o do link antes
 select(0);

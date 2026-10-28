@@ -55,6 +55,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cold); outline-
   background: color-mix(in srgb, var(--panel) 94%, transparent); border: 1px solid var(--line); border-radius: 14px;
   display: grid; gap: 10px; box-shadow: 0 18px 40px rgba(0,0,0,.35);
 }
+.card-head { position: relative; display: grid; gap: 10px; }
+.card-more { display: grid; gap: 10px; }
+.card-toggle { display: none; }
 .eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .card p { margin: 0; max-width: 62ch; }
 
@@ -68,6 +71,19 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cold); outline-
 .btn:disabled { opacity: .35; cursor: default; }
 
 @media (max-width: 640px) {
-  .brand h1 { font-size: 21px; }
+  .top { align-items: center; flex-wrap: nowrap; }
+  .brand h1 { font-size: 20px; }
+  .brand p { display: none; }
   .card p { font-size: 14px; }
+  .card { gap: 8px; }
+  /* painel recolhido: só título e Anterior/Próximo; toque no título abre o resto */
+  .card-head { cursor: pointer; padding-right: 44px; gap: 6px; }
+  .card-toggle {
+    display: grid; place-items: center; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+    width: 38px; height: 38px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: none; color: var(--ink); cursor: pointer;
+  }
+  .card-toggle svg { width: 18px; height: 18px; stroke: currentColor; transition: transform .2s; }
+  .card-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .card.collapsed .card-more { display: none; }
+  .btn { padding: 10px 14px; }
 }

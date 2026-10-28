@@ -1,6 +1,8 @@
-/* Navegação entre as duas páginas: exposta no desktop, dentro do hambúrguer no celular. */
-.brand-row { display: flex; align-items: center; gap: 12px 20px; }
-.pages { position: relative; order: 2; }
+/* Navegação entre as páginas, idioma e modo: expostos no desktop, dentro do hambúrguer no celular. */
+.brand-row { display: flex; align-items: center; gap: 12px 20px; flex: 1; }
+.pages { position: relative; order: 2; flex: 1; display: flex; align-items: center; gap: 12px; }
+/* no desktop o painel do menu não existe como caixa: links e ferramentas ficam direto na barra */
+.menu-panel { display: contents; }
 .menu-btn {
   display: none; align-items: center; justify-content: center; width: 42px; height: 42px; padding: 0; cursor: pointer;
   background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid #3a535d; border-radius: 12px;
@@ -19,7 +21,7 @@
 .page-links a[aria-current="page"] { color: var(--cold); background: color-mix(in srgb, var(--cold) 14%, transparent); }
 
 /* Lado direito do cabeçalho: idioma (PT | EN) e modo da página */
-.tools { display: flex; align-items: center; gap: 8px; }
+.tools { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .lang { display: flex; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--panel) 88%, transparent); }
 .lang button {
   font: 600 12px/1 var(--mono); letter-spacing: .06em; color: var(--muted); background: none; border: 0; border-radius: 999px;
@@ -28,12 +30,18 @@
 .lang button:hover { color: var(--ink); }
 .lang button[aria-pressed="true"] { color: var(--cold); background: color-mix(in srgb, var(--cold) 14%, transparent); }
 @media (max-width: 640px) {
-  .pages { order: 0; }
+  .pages { order: 0; flex: none; }
   .menu-btn { display: inline-flex; }
-  .page-links {
-    display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 10; min-width: 230px;
-    flex-direction: column; gap: 2px; padding: 6px; background: var(--panel); box-shadow: 0 16px 40px rgba(0,0,0,.5);
+  .menu-panel {
+    display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 10; width: min(300px, calc(100vw - 32px));
+    flex-direction: column; gap: 10px; padding: 8px; box-sizing: border-box;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 16px 40px rgba(0,0,0,.5);
   }
-  .pages.open .page-links { display: flex; }
+  .pages.open .menu-panel { display: flex; }
+  .page-links { flex-direction: column; gap: 2px; padding: 0; border: 0; background: none; }
   .page-links a { padding: 13px 12px; font-size: 15px; }
+  /* modo e idioma em blocos de largura cheia, abaixo das páginas */
+  .tools { flex-direction: column; align-items: stretch; gap: 8px; margin: 0; padding-top: 10px; border-top: 1px solid var(--line); }
+  .tools .mode, .tools .lang { background: #0d191e; }
+  .tools .mode button, .tools .lang button { flex: 1; padding: 11px 10px; font-size: 14px; }
 }

@@ -1,9 +1,10 @@
 // Câmera do tour: voo suave entre os passos e enquadramento para tela de celular.
 import * as THREE from "three";
+import { freeArea } from "../shared/dom.js";
 
 // celular em pé: afasta a câmera para caber a cena
 const portrait = camera => camera.aspect < 0.8;
-const pullBack = (cam, target) => cam.map((c, i) => target[i] + (c - target[i]) * 1.6);
+const pullBack = (cam, target) => cam.map((c, i) => target[i] + (c - target[i]) * 1.25);
 
 export function createRig(camera, controls, { reduce }) {
   let tween = null;
@@ -25,12 +26,11 @@ export function createRig(camera, controls, { reduce }) {
     camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.t0, tween.t1, e);
     if (tween.t >= 1) tween = null;
   }
-  // card: painel do passo; a cena sobe para não ficar escondida atrás dele
-  function fit(card) {
+  // centraliza a cena na faixa livre entre o topo e o painel do passo
+  function fit() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.fov = portrait(camera) ? 62 : 45;
-    const shift = card ? card.getBoundingClientRect().height * 0.42 : 0;
-    camera.setViewOffset(window.innerWidth, window.innerHeight, 0, shift, window.innerWidth, window.innerHeight);
+    camera.setViewOffset(window.innerWidth, window.innerHeight, 0, freeArea().shift, window.innerWidth, window.innerHeight);
     camera.updateProjectionMatrix();
   }
   return { place, flyTo, tick, fit };
