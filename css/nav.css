@@ -17,6 +17,16 @@
 .page-links a svg { width: 18px; height: 18px; stroke: currentColor; flex: none; }
 .page-links a:hover { color: var(--ink); }
 .page-links a[aria-current="page"] { color: var(--cold); background: color-mix(in srgb, var(--cold) 14%, transparent); }
+
+/* Lado direito do cabeçalho: idioma (PT | EN) e modo da página */
+.tools { display: flex; align-items: center; gap: 8px; }
+.lang { display: flex; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--panel) 88%, transparent); }
+.lang button {
+  font: 600 12px/1 var(--mono); letter-spacing: .06em; color: var(--muted); background: none; border: 0; border-radius: 999px;
+  padding: 8px 10px; cursor: pointer;
+}
+.lang button:hover { color: var(--ink); }
+.lang button[aria-pressed="true"] { color: var(--cold); background: color-mix(in srgb, var(--cold) 14%, transparent); }
 @media (max-width: 640px) {
   .pages { order: 0; }
   .menu-btn { display: inline-flex; }

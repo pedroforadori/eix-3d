@@ -4,6 +4,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { $ } from "../shared/dom.js";
 import { initPageNav } from "../shared/page-nav.js";
 import { setHash, onHashChange } from "../shared/hash.js";
+import { initI18n, onLangChange } from "../shared/i18n.js";
+import { STRINGS } from "../shared/strings.js";
 import { GROUND } from "../shared/palette.js";
 import { STEPS } from "./steps.js";
 import { buildBuilding } from "./building.js";
@@ -11,6 +13,8 @@ import { buildFlows } from "./flows.js";
 import { createLabels } from "./labels.js";
 import { createRig } from "./camera-rig.js";
 import { createPanel } from "./panel.js";
+
+initI18n(STRINGS, $("lang"));
 
 // ---------- Cena ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -72,6 +76,7 @@ window.addEventListener("keydown", e => {
 });
 initPageNav($("pages"), $("menu-open"));
 onHashChange(route);
+onLangChange(() => { panel.refresh(); labels.relabel(); resize(); });
 
 // ---------- Loop ----------
 const clock = new THREE.Clock();

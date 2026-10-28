@@ -1,14 +1,17 @@
 // As 4 fotos, na mesma ordem do arquivo alvos.mind.
 // Coordenadas em pixels da foto original (474 de largura); z = quanto o fluxo sai da foto, em larguras da foto.
-// flows(add) desenha os caminhos: add(pontos, cor inicial, cor final, faixa da transição).
+// tab/title/text vêm em PT e EN. flows(add) desenha os caminhos: add(pontos, cor inicial, cor final, faixa da transição).
 import { FLOW_COLORS as COL } from "../shared/palette.js";
 import { rnd } from "../shared/particles.js";
 
 export const TARGETS = [
   {
-    file: "alvos/1-telhado.jpg", w: 474, h: 316, tab: "Telhado",
-    title: "Chillers no telhado",
-    text: "Os ventiladores em cima puxam o ar da rua pelas serpentinas em V. O ar leva o calor da água e sai quente para cima. A água gelada desce pela tubulação até a sala.",
+    file: "alvos/1-telhado.jpg", w: 474, h: 316, tab: { pt: "Telhado", en: "Roof" },
+    title: { pt: "Chillers no telhado", en: "Chillers on the roof" },
+    text: {
+      pt: "Os ventiladores em cima puxam o ar da rua pelas serpentinas em V. O ar leva o calor da água e sai quente para cima. A água gelada desce pela tubulação até a sala.",
+      en: "The fans on top pull outside air through the V-shaped coils. The air takes the heat from the water and leaves hot, upward. Chilled water runs down the pipes to the room.",
+    },
     legend: ["outside", "hot", "water", "ret"],
     flows(add) {
       for (let i = 0; i < 12; i++) {
@@ -22,9 +25,12 @@ export const TARGETS = [
     },
   },
   {
-    file: "alvos/2-chiller.jpg", w: 474, h: 316, tab: "Chiller",
-    title: "Chiller resfriado a ar",
-    text: "Cada V da lateral é uma serpentina com a água do data center. O ar da rua passa por ela, esquenta e é jogado para cima pelos ventiladores do topo.",
+    file: "alvos/2-chiller.jpg", w: 474, h: 316, tab: { pt: "Chiller", en: "Chiller" },
+    title: { pt: "Chiller resfriado a ar", en: "Air-cooled chiller" },
+    text: {
+      pt: "Cada V da lateral é uma serpentina com a água do data center. O ar da rua passa por ela, esquenta e é jogado para cima pelos ventiladores do topo.",
+      en: "Each V on the side is a coil carrying the data center's water. Outside air passes through it, heats up and is blown upward by the fans on top.",
+    },
     legend: ["outside", "hot", "water", "ret"],
     flows(add) {
       for (let i = 0; i < 12; i++) {
@@ -36,9 +42,12 @@ export const TARGETS = [
     },
   },
   {
-    file: "alvos/3-sala.jpg", w: 474, h: 355, tab: "Sala",
-    title: "Ar-condicionado da sala (CRAH)",
-    text: "O CRAH sopra o ar frio por baixo do piso elevado. O ar sobe pelas placas perfuradas, entra pela frente dos racks e o ar quente volta por cima até o CRAH.",
+    file: "alvos/3-sala.jpg", w: 474, h: 355, tab: { pt: "Sala", en: "Room" },
+    title: { pt: "Ar-condicionado da sala (CRAH)", en: "Room air handler (CRAH)" },
+    text: {
+      pt: "O CRAH sopra o ar frio por baixo do piso elevado. O ar sobe pelas placas perfuradas, entra pela frente dos racks e o ar quente volta por cima até o CRAH.",
+      en: "The CRAH blows cold air under the raised floor. The air rises through the perforated tiles, enters the front of the racks, and the hot air returns overhead to the CRAH.",
+    },
     legend: ["cold", "hot"],
     flows(add) {
       for (let i = 0; i < 12; i++) {
@@ -56,9 +65,12 @@ export const TARGETS = [
     },
   },
   {
-    file: "alvos/4-corredor-quente.jpg", w: 474, h: 631, tab: "Corredor quente",
-    title: "Corredor quente fechado",
-    text: "O ar sai quente pela parte de trás dos servidores, fica preso no corredor fechado e sobe pelas grelhas do forro, de volta ao ar-condicionado da sala.",
+    file: "alvos/4-corredor-quente.jpg", w: 474, h: 631, tab: { pt: "Corredor quente", en: "Hot aisle" },
+    title: { pt: "Corredor quente fechado", en: "Enclosed hot aisle" },
+    text: {
+      pt: "O ar sai quente pela parte de trás dos servidores, fica preso no corredor fechado e sobe pelas grelhas do forro, de volta ao ar-condicionado da sala.",
+      en: "Hot air leaves the back of the servers, stays trapped in the enclosed aisle and rises through the ceiling grilles, back to the room's air handler.",
+    },
     legend: ["hot"],
     flows(add) {
       for (let i = 0; i < 16; i++) {

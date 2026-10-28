@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tour do resfriamento</title>
+<title data-i18n="tourDocTitle">Cooling tour</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,49 +15,55 @@
 <body>
 
 <div id="stage"></div>
-<div class="loading" id="loading">Carregando a cena 3D...</div>
+<div class="loading" id="loading" data-i18n="loading">Loading the 3D scene...</div>
 <div class="labels" id="labels"></div>
 
 <header class="top">
   <div class="brand-row">
-    <nav class="pages" id="pages" aria-label="Páginas">
-      <button class="menu-btn" id="menu-open" aria-label="Menu" aria-expanded="false" aria-controls="page-links"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <nav class="pages" id="pages" aria-label="Pages" data-i18n-aria="pages">
+      <button class="menu-btn" id="menu-open" aria-label="Menu" data-i18n-aria="menu" aria-expanded="false" aria-controls="page-links"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
       <div class="page-links" id="page-links">
-        <a href="index.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linejoin="round"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg>Tour 3D</a>
-        <a href="ar.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg>Nas fotos (AR)</a>
+        <a href="index.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linejoin="round"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg><span data-i18n="navTour">3D tour</span></a>
+        <a href="ar.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg><span data-i18n="navAr">On the photos (AR)</span></a>
       </div>
     </nav>
     <div class="brand">
-      <h1>Tour do resfriamento</h1>
-      <p>Protótipo · data center</p>
+      <h1 data-i18n="tourTitle">Cooling tour</h1>
+      <p data-i18n="tourSub">Prototype · data center</p>
     </div>
   </div>
-  <div class="mode" role="group" aria-label="Modo de visualização">
-    <button id="mode-steps" aria-pressed="true">Passo a passo</button>
-    <button id="mode-all" aria-pressed="false">Ciclo completo</button>
+  <div class="tools">
+    <div class="lang" id="lang" role="group" aria-label="Language" data-i18n-aria="language">
+      <button data-lang="pt" aria-pressed="false">PT</button>
+      <button data-lang="en" aria-pressed="true">EN</button>
+    </div>
+    <div class="mode" role="group" aria-label="View mode" data-i18n-aria="viewMode">
+      <button id="mode-steps" aria-pressed="true" data-i18n="modeSteps">Step by step</button>
+      <button id="mode-all" aria-pressed="false" data-i18n="modeAll">Full cycle</button>
+    </div>
   </div>
 </header>
 
-<div class="legend" aria-label="Legenda">
-  <span><i style="background:var(--outside)"></i>Ar da rua</span>
-  <span><i style="background:var(--cold)"></i>Ar frio</span>
-  <span><i style="background:var(--hot)"></i>Ar quente</span>
-  <span><i style="background:var(--water)"></i>Água gelada</span>
-  <span><i style="background:var(--return)"></i>Água de retorno</span>
+<div class="legend" aria-label="Legend" data-i18n-aria="legend">
+  <span><i style="background:var(--outside)"></i><span data-i18n="flowOutside">Outside air</span></span>
+  <span><i style="background:var(--cold)"></i><span data-i18n="flowCold">Cold air</span></span>
+  <span><i style="background:var(--hot)"></i><span data-i18n="flowHot">Hot air</span></span>
+  <span><i style="background:var(--water)"></i><span data-i18n="flowWater">Chilled water</span></span>
+  <span><i style="background:var(--return)"></i><span data-i18n="flowRet">Return water</span></span>
 </div>
 
 <section class="sheet">
   <div class="card" aria-live="polite">
-    <div class="eyebrow" id="eyebrow">Visão geral</div>
-    <h2 id="title">Como o data center se mantém frio</h2>
+    <div class="eyebrow" id="eyebrow">Overview</div>
+    <h2 id="title">How the data center stays cool</h2>
     <p id="text"></p>
     <div class="temps" id="temps"></div>
     <div class="nav">
-      <button class="btn" id="prev">Anterior</button>
+      <button class="btn" id="prev" data-i18n="prev">Previous</button>
       <div class="dots" id="dots"></div>
-      <button class="btn primary" id="next">Próximo</button>
+      <button class="btn primary" id="next">Next</button>
     </div>
-    <div class="note">Arraste para girar · pinça ou roda para aproximar · temperaturas típicas, ilustrativas</div>
+    <div class="note" data-i18n="tourNote">Drag to rotate · pinch or scroll to zoom · typical temperatures, for illustration only</div>
   </div>
 </section>
 

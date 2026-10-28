@@ -2,10 +2,14 @@
 import { $ } from "../shared/dom.js";
 import { initPageNav } from "../shared/page-nav.js";
 import { setHash, onHashChange } from "../shared/hash.js";
+import { initI18n, onLangChange } from "../shared/i18n.js";
+import { STRINGS } from "../shared/strings.js";
 import { TARGETS } from "./targets.js";
 import { createPanel } from "./panel.js";
 import { createDemoView } from "./demo-view.js";
 import { createCameraView } from "./camera-view.js";
+
+initI18n(STRINGS, $("lang"));
 
 let current = 0, mode = "demo";
 const panel = createPanel(TARGETS, { select });
@@ -23,14 +27,14 @@ function select(i) {
   setHash("foto-" + (i + 1));
 }
 async function startCamera() {
-  panel.message("Abrindo a câmera...");
+  panel.message("camOpening");
   try {
     await views.ar.start();
     panel.message("");
     panel.waiting();
   } catch (e) {
     console.error(e);
-    panel.message("Não foi possível abrir a câmera. Confira se a página está em https e se a permissão da câmera foi liberada.", true);
+    panel.message("camError", true);
     setMode("demo");
   }
 }
@@ -58,6 +62,7 @@ window.addEventListener("keydown", e => {
 });
 initPageNav($("pages"), $("menu-open"));
 onHashChange(route);
+onLangChange(() => { panel.refresh(); views.demo.resize(); });
 
 const startHash = location.hash; // select(0) troca o hash, então guarda o do link antes
 select(0);
