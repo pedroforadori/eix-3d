@@ -28,7 +28,7 @@ Site estático, sem build e sem `npm install`. three.js 0.160.0 e MindAR 1.2.5 v
 
 Fotos com bastante detalhe e contraste rastreiam melhor. Fotos lisas (céu, parede branca) rastreiam mal.
 
-## Publicar
+## Deploy
 
 Netlify: Sites, Add new site, Deploy manually, e arraste esta pasta. Para atualizar, arraste de novo em Deploys (o link continua o mesmo).
 
