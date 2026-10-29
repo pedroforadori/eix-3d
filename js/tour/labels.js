@@ -1,6 +1,6 @@
 // Rótulos em HTML presos a pontos da cena.
 import * as THREE from "three";
-import { FLOOR, ROOF } from "./building.js";
+import { FLOOR, ROOF, CRAH } from "./building.js";
 import { tr } from "../shared/i18n.js";
 
 const LABELS = {
@@ -9,6 +9,8 @@ const LABELS = {
   cold: [{ pt: "Corredor frio", en: "Cold aisle" }, [3, FLOOR + 2.5, 0]],
   hot: [{ pt: "Corredor quente", en: "Hot aisle" }, [3, FLOOR + 2.7, 2.6]],
   floor: [{ pt: "Piso elevado", en: "Raised floor" }, [-5.6, 0.2, 3.5]],
+  coil: [{ pt: "Serpentina", en: "Cooling coil" }, [CRAH.coilBottom[0] + 0.1, CRAH.coilBottom[1] + 0.15, 1.6]],
+  fans: [{ pt: "Ventiladores", en: "Fans" }, [CRAH.x + 0.6, FLOOR + 0.45, 1.6]],
 };
 
 // update(chaves) mostra só esses rótulos e reposiciona todos pela câmera; relabel() troca o idioma.

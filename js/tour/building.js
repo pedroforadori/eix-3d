@@ -1,16 +1,46 @@
-// Prédio em corte: laje, piso elevado (60 cm), sala, forro, entreforro e telhado, com CRAH, racks e chillers.
+// Prédio em corte: laje, piso elevado (60 cm), sala, forro, entreforro e telhado, com CRAH em corte, racks e chillers.
 import * as THREE from "three";
 
 export const FLOOR = 0.6, CEIL = 3.6, ROOF = 4.6;
+// CRAH em corte e chiller: medidas compartilhadas com os fluxos (flows.js) para o ar passar nos lugares certos
+export const CRAH = {
+  x: -7.4,
+  coilTop: [-7.85, FLOOR + 2.15], coilBottom: [-6.95, FLOOR + 1.35], // serpentina inclinada (x, y)
+  fanZ: [-1.15, 0, 1.15],
+  supplyHeader: [[-7.6, FLOOR + 2.7, -1.4], [-7.6, FLOOR + 2.45, -1.82], [-7.85, FLOOR + 2.17, -1.82]],
+  returnHeader: [[-6.95, FLOOR + 1.37, -1.82], [-7.2, FLOOR + 2.2, -1.82], [-7.2, FLOOR + 2.7, -1.75]],
+};
+export const CHILLER = { length: 5, depth: 2.2, bays: 5, fanZ: [-0.52, 0.52] };
 
 export const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, metalness: 0.1, ...extra });
 const glass = (color, opacity) => new THREE.MeshStandardMaterial({ color, transparent: true, opacity, depthWrite: false, side: THREE.DoubleSide, roughness: 0.4 });
+
+// Listras finas em textura (aletas de serpentina, filtro); dir "u" = listras em pé, "v" = deitadas.
+function stripes(bg, line, n, dir) {
+  const c = document.createElement("canvas"); c.width = c.height = 256;
+  const g = c.getContext("2d"); g.fillStyle = bg; g.fillRect(0, 0, 256, 256); g.fillStyle = line;
+  const w = Math.max(1, 96 / n);
+  for (let i = 0; i < n; i++) { const p = Math.round((i * 256) / n); if (dir === "u") g.fillRect(p, 0, w, 256); else g.fillRect(0, p, 256, w); }
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
+}
 
 // Monta o prédio na cena. update(dt, { roof, ceil }) gira os ventiladores e esmaece telhado/forro quando estão ocultos.
 export function buildBuilding(scene) {
   function box(w, h, d, material, x, y, z) {
     const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
     m.position.set(x, y, z); scene.add(m); return m;
+  }
+
+  // ventilador com anel; devolve as pás para girar
+  function fan(x, y, z, r, h) {
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 24, 1, true), mat(0x58656a, { side: THREE.DoubleSide }));
+    ring.position.set(x, y, z); scene.add(ring);
+    const blades = new THREE.Group();
+    for (let b = 0; b < 4; b++) {
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(r * 1.75, 0.02, r * 0.3), mat(0x2b3438));
+      blade.rotation.y = (b * Math.PI) / 4; blade.rotation.x = 0.25; blades.add(blade);
+    }
+    blades.position.set(x, y, z); scene.add(blades); return blades;
   }
 
   box(18, 0.2, 11, mat(0x1a2a31), 0, -0.1, 0);
@@ -31,10 +61,37 @@ export function buildBuilding(scene) {
   const grille = glass(0xff8a3d, 0.3); ceilMats.push([grille, 0.3]);
   for (const z of [-2.55, 2.55]) for (let x = -4.2; x <= 5.4; x += 1.2) box(1.1, 0.05, 0.56, grille, x, CEIL, z);
 
-  // CRAH (ar-condicionado de precisão da sala), insuflamento por baixo
-  box(1.2, 2.6, 3.8, mat(0x39474d, { roughness: 0.6 }), -7.4, FLOOR + 1.3, 0);
-  box(0.02, 0.5, 0.8, mat(0x4fd2ff, { emissive: 0x0b4a5c }), -6.79, FLOOR + 2.1, 0.8);
-  box(1.2, 1.0, 3.8, glass(0x8aa0a8, 0.25), -7.4, CEIL + 0.5, 0); // duto de retorno até o entreforro
+  const fans = [];
+
+  // CRAH em corte (ar-condicionado de precisão da sala), como no vídeo de referência: o ar quente entra por cima,
+  // passa pelo filtro e pela serpentina inclinada com água gelada, e os ventiladores de baixo sopram o ar frio no piso.
+  const CX = CRAH.x, CB = FLOOR;
+  const frame = mat(0x5b6a70, { metalness: 0.3 });
+  box(0.04, 2.6, 3.8, mat(0x2c383d), CX - 0.58, CB + 1.3, 0); // fundo
+  for (const s of [-1, 1]) box(1.2, 2.6, 0.04, glass(0x8aa0a8, 0.28), CX, CB + 1.3, s * 1.88); // laterais
+  box(0.03, 2.6, 3.8, glass(0x9fb4bb, 0.07), CX + 0.6, CB + 1.3, 0); // frente de vidro: é o corte
+  for (const x of [-0.58, 0.58]) for (const z of [-1.88, 1.88]) box(0.06, 2.6, 0.06, frame, CX + x, CB + 1.3, z);
+  for (const y of [0, 2.6]) for (const z of [-1.88, 1.88]) box(1.2, 0.06, 0.06, frame, CX, CB + y, z);
+  // filtro na entrada de cima
+  box(1.1, 0.08, 3.7, mat(0xffffff, { map: stripes("#d5dde0", "#93a5ab", 40, "v"), roughness: 0.9 }), CX, CB + 2.42, 0);
+  // serpentina: aletas de alumínio (listras) com pontas de cobre nas laterais
+  const [tx, ty] = CRAH.coilTop, [bx, by] = CRAH.coilBottom;
+  const coil = box(Math.hypot(bx - tx, by - ty), 0.14, 3.5, mat(0xffffff, { map: stripes("#c3ced2", "#6c7c83", 90, "v"), metalness: 0.5, roughness: 0.4 }),
+    (tx + bx) / 2, (ty + by) / 2, 0);
+  coil.rotation.z = Math.atan2(by - ty, bx - tx);
+  const copper = mat(0xc27a4a, { metalness: 0.6, roughness: 0.35 });
+  for (let k = 0; k < 6; k++) for (const s of [-1, 1]) {
+    const f = (k + 0.5) / 6, stub = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.1, 10), copper);
+    stub.rotation.x = Math.PI / 2; stub.position.set(tx + (bx - tx) * f, ty + (by - ty) * f, s * 1.79); scene.add(stub);
+  }
+  // coletores: a água gelada chega na ponta de cima da serpentina e sai pela de baixo
+  for (const [pts, col] of [[CRAH.supplyHeader, 0x2a63c4], [CRAH.returnHeader, 0xc23a2e]]) {
+    const curve = new THREE.CatmullRomCurve3(pts.map(q => new THREE.Vector3(...q)), false, "catmullrom", 0.05);
+    scene.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.05, 8), mat(col, { metalness: 0.5, roughness: 0.4 })));
+  }
+  // ventiladores embaixo, soprando para dentro do vão do piso
+  for (const z of CRAH.fanZ) fans.push(fan(CX, CB + 0.42, z, 0.4, 0.22));
+  box(1.2, 1.0, 3.8, glass(0x8aa0a8, 0.25), CX, CEIL + 0.5, 0); // duto de retorno até o entreforro
 
   // Racks: duas fileiras com as frentes viradas para o corredor frio
   const rackMat = new THREE.MeshStandardMaterial({ color: 0x151b1e, transparent: true, opacity: 0.6, roughness: 0.5, depthWrite: false });
@@ -50,33 +107,39 @@ export function buildBuilding(scene) {
     box(0.04, CEIL - FLOOR, 1.35, glass(0xff8a3d, 0.1), 5.4, (CEIL + FLOOR) / 2, side * 2.53);
   }
 
-  // Chillers resfriados a ar no telhado
-  const roofMats = [], fans = [];
+  // Chillers resfriados a ar no telhado, como o Trane da referência: base com compressores,
+  // serpentinas nas laterais (triângulos claros com a ponta para baixo) e 2 fileiras de ventiladores no topo.
+  const roofMats = [];
   function chiller(cx) {
-    const base = ROOF + 0.25;
+    const base = ROOF + 0.25, { length: L, depth: D, bays } = CHILLER, bay = L / bays;
     const start = scene.children.length;
-    box(5, 0.9, 2.2, mat(0x6f7b80, { metalness: 0.3 }), cx, base + 0.45, 0);
-    const coil = mat(0x9aa6ab, { metalness: 0.4, roughness: 0.5 });
-    const coilFace = new THREE.MeshStandardMaterial({ color: 0x4a585e, side: THREE.DoubleSide, metalness: 0.2 });
-    for (let i = 0; i < 4; i++) {
-      const x = cx - 1.875 + i * 1.25;
-      for (const s of [-1, 1]) {
-        // serpentina em V: duas faces inclinadas
-        const p = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.6), coilFace);
-        p.position.set(x, base + 1.7, s * 0.85); p.rotation.x = s * 0.35; scene.add(p);
-      }
-      box(0.05, 1.6, 2.2, coil, x - 0.62, base + 1.7, 0);
-      // ventilador
-      const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.3, 24, 1, true), mat(0x58656a, { side: THREE.DoubleSide }));
-      ring.position.set(x, base + 2.65, 0); scene.add(ring);
-      const fan = new THREE.Group();
-      for (let b = 0; b < 4; b++) {
-        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.02, 0.16), mat(0x2b3438));
-        blade.rotation.y = (b * Math.PI) / 4; blade.rotation.x = 0.25; fan.add(blade);
-      }
-      fan.position.set(x, base + 2.65, 0); scene.add(fan); fans.push(fan);
+    const white = mat(0xd6dcdf, { roughness: 0.6 }), dark = mat(0x2b3438);
+    box(L, 0.12, D, dark, cx, base + 0.06, 0); // base
+    for (const x of [-L / 2, L / 2]) for (const z of [-D / 2, D / 2]) box(0.08, 2.44, 0.08, white, cx + x, base + 1.22, z);
+    for (const x of [-L / 2, L / 2]) box(0.04, 1.6, D, white, cx + x, base + 1.6, 0); // painéis das pontas
+    // compressores e bomba na base
+    const steel = mat(0x7d878c, { metalness: 0.45, roughness: 0.5 });
+    for (let k = 0; k < 4; k++) {
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.55, 16), steel);
+      c.position.set(cx - 1.5 + k * 0.8, base + 0.4, 0); scene.add(c);
     }
-    box(5, 0.08, 2.2, mat(0x6f7b80), cx, base + 2.5, 0);
+    const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.6, 16), mat(0x3a4448, { metalness: 0.3 }));
+    motor.rotation.z = Math.PI / 2; motor.position.set(cx + 1.9, base + 0.35, 0.5); scene.add(motor);
+    box(L, 0.05, D, white, cx, base + 0.78, 0);
+    // serpentinas: face de aletas recuada e triângulos claros por cima
+    const coilFace = mat(0xffffff, { map: stripes("#45535a", "#27323a", 120, "u"), metalness: 0.2 });
+    const tri = new THREE.Shape();
+    tri.moveTo(-bay / 2, 0.8); tri.lineTo(bay / 2, 0.8); tri.lineTo(0, -0.8); tri.closePath();
+    const triGeo = new THREE.ShapeGeometry(tri), triMat = mat(0xe3e8ea, { side: THREE.DoubleSide });
+    for (const s of [-1, 1]) {
+      box(L, 1.6, 0.04, coilFace, cx, base + 1.6, s * (D / 2 - 0.06));
+      for (let b = 0; b < bays; b++) {
+        const m = new THREE.Mesh(triGeo, triMat);
+        m.position.set(cx - L / 2 + bay * (b + 0.5), base + 1.6, s * D / 2); scene.add(m);
+      }
+    }
+    box(L, 0.08, D, white, cx, base + 2.44, 0); // tampo
+    for (let b = 0; b < bays; b++) for (const z of CHILLER.fanZ) fans.push(fan(cx - L / 2 + bay * (b + 0.5), base + 2.6, z, 0.4, 0.24));
     for (const o of scene.children.slice(start)) o.traverse(m => {
       if (m.material && !roofMats.includes(m.material)) { m.material.transparent = true; roofMats.push(m.material); }
     });

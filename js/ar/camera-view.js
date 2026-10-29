@@ -4,7 +4,7 @@ import { buildOverlay, POINT_SIZE } from "./overlay.js";
 
 const MINDAR = "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js";
 
-// Mesma interface do modo sem câmera (start/stop). start() é assíncrono e rejeita se a câmera não abrir.
+// Mesma interface do modo sem câmera (start/stop/relabel). start() é assíncrono e rejeita se a câmera não abrir.
 // found(i) avisa que a foto i apareceu; lost() que ela saiu de vista.
 export function createCameraView(el, targets, { found, lost }) {
   let mindar = null, overlays = [];
@@ -44,5 +44,6 @@ export function createCameraView(el, targets, { found, lost }) {
     try { mindar.stop(); } catch (e) { /* já parado */ }
     el.hidden = true;
   }
-  return { start, stop };
+  const relabel = () => overlays.forEach(o => o.userData.relabel());
+  return { start, stop, relabel };
 }

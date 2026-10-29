@@ -5,7 +5,7 @@ import { GROUND } from "../shared/palette.js";
 import { freeArea } from "../shared/dom.js";
 import { buildOverlay } from "./overlay.js";
 
-// Mesma interface do modo câmera (start/stop), mais show(i) para trocar a foto e resize().
+// Mesma interface do modo câmera (start/stop/relabel), mais show(i) para trocar a foto e resize().
 export function createDemoView(el, targets) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -74,5 +74,6 @@ export function createDemoView(el, targets) {
     if (!running) { running = true; loop(); }
   }
   function stop() { running = false; el.hidden = true; }
-  return { start, stop, show, resize };
+  const relabel = () => overlays.forEach(o => o.userData.relabel());
+  return { start, stop, show, resize, relabel };
 }

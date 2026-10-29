@@ -4,14 +4,14 @@ Site estático, sem build e sem `npm install`. three.js 0.160.0 e MindAR 1.2.5 v
 
 ## Arquivos
 
-- `index.html`: tour 3D (planta em corte, 5 passos). Só a marcação; o código fica em `js/tour/`.
+- `index.html`: tour 3D (planta em corte, 6 passos, incluindo o CRAH por dentro). Só a marcação; o código fica em `js/tour/`.
 - `ar.html`: fluxos em cima das fotos, modo "Sem câmera" (foto em 3D) e "Usar câmera" (MindAR). Só a marcação; o código fica em `js/ar/`.
 - `css/`: `base.css` (tokens e layout comum), `nav.css` (troca de página e hambúrguer), `tour.css` e `ar.css` (só de cada página).
-- `js/shared/`: o que as duas páginas usam: `palette.js` (cores dos fluxos, que repetem os tokens do `base.css`; mude nos dois), `particles.js` (partículas correndo por curvas), `page-nav.js` (menu e balões que fecham com toque fora), `card.js` (painel de baixo recolhível no celular), `hash.js` (links diretos `#passo-3`, `#foto-2`), `i18n.js` (troca PT/EN: a escolha fica no navegador, padrão EN, `?lang=pt` força pelo link) com os textos fixos em `strings.js`, e `dom.js` (inclui `freeArea()`, a faixa livre entre topo e painel onde a cena é centralizada). Os textos dos passos e das fotos ficam em `{ pt, en }` dentro de `steps.js` e `targets.js`.
-- `js/tour/`: `steps.js` (textos, câmeras e flags de cada passo), `building.js` (geometria; constantes `FLOOR`, `CEIL`, `ROOF`), `flows.js` (os 5 fluxos), `labels.js`, `camera-rig.js`, `panel.js` e `main.js`, que liga tudo.
+- `js/shared/`: o que as duas páginas usam: `palette.js` (cores dos fluxos, que repetem os tokens do `base.css`; mude nos dois), `particles.js` (partículas e setas de sentido correndo por curvas), `page-nav.js` (menu e balões que fecham com toque fora), `card.js` (painel de baixo recolhível no celular), `hash.js` (links diretos `#passo-3`, `#foto-2`), `i18n.js` (troca PT/EN: a escolha fica no navegador, padrão EN, `?lang=pt` força pelo link) com os textos fixos em `strings.js`, e `dom.js` (inclui `freeArea()`, a faixa livre entre topo e painel onde a cena é centralizada). Os textos dos passos e das fotos ficam em `{ pt, en }` dentro de `steps.js` e `targets.js`.
+- `js/tour/`: `steps.js` (textos, câmeras e flags de cada passo), `building.js` (geometria, com o CRAH em corte e o chiller no estilo Trane; constantes `FLOOR`, `CEIL`, `ROOF`, `CRAH`, `CHILLER`, que os fluxos também usam), `flows.js` (os fluxos, com as setas), `labels.js`, `camera-rig.js`, `panel.js` e `main.js`, que liga tudo.
 - `js/ar/`: `targets.js` (tudo de cada foto: arquivo, textos, legenda e `flows()`, com coordenadas em pixels da foto original de 474 px de largura e `z` = quanto o fluxo sai da foto, em larguras da foto), `overlay.js`, `panel.js`, `demo-view.js` e `camera-view.js` (os dois modos, ambos com `start()`/`stop()`) e `main.js`.
-- `alvos.mind`: arquivo de rastreamento das 4 fotos, nesta ordem: 1-telhado, 2-chiller, 3-sala, 4-corredor-quente. A ordem tem que bater com `TARGETS` em `js/ar/targets.js`.
-- `alvos/`: as fotos. São as mesmas que vão nos slides do Carlos, sem cortar.
+- `alvos.mind`: arquivo de rastreamento das 6 fotos, nesta ordem: 1-telhado, 2-chiller, 3-sala, 4-corredor-quente, 5-crah-corte, 6-predio-corte. A ordem tem que bater com `TARGETS` em `js/ar/targets.js`, onde cada foto também tem as etiquetas de temperatura (`labels`).
+- `alvos/`: as fotos. São as mesmas que vão nos slides do Carlos, sem cortar. As fotos 5 e 6 (CRAH Vertiv em corte e corte do prédio) são novas: para o modo câmera reconhecer, elas precisam entrar no slide também. Elas têm menos detalhe que as outras, então rastreiam melhor grandes na tela e com boa luz.
 - `_headers`: pede para buscadores não indexarem (Netlify).
 
 ## Rodar local

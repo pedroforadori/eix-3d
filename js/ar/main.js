@@ -48,11 +48,11 @@ function setMode(m) {
   if (m === "ar") { startCamera(); setHash("camera"); }
   else { select(current); views.demo.start(); }
 }
-// #foto-1 a #foto-4 ou #camera, vindos de um link direto
+// #foto-1 a #foto-N ou #camera, vindos de um link direto
 function route(h) {
-  const m = /^#foto-([1-4])$/.exec(h);
+  const m = /^#foto-(\d+)$/.exec(h);
   if (h === "#camera") setMode("ar");
-  else if (m) { setMode("demo"); select(+m[1] - 1); }
+  else if (m && +m[1] >= 1 && +m[1] <= TARGETS.length) { setMode("demo"); select(+m[1] - 1); }
 }
 $("mode-demo").addEventListener("click", () => setMode("demo"));
 $("mode-ar").addEventListener("click", () => setMode("ar"));
@@ -63,7 +63,8 @@ window.addEventListener("keydown", e => {
 });
 initPageNav($("pages"), $("menu-open"));
 onHashChange(route);
-onLangChange(() => panel.refresh()); // a altura nova do painel reenquadra via initCard
+// a altura nova do painel reenquadra via initCard
+onLangChange(() => { panel.refresh(); views.demo.relabel(); views.ar.relabel(); });
 initCard($("card"), $("card-head"), $("card-toggle"), () => views.demo.resize());
 
 const startHash = location.hash; // select(0) troca o hash, então guarda o do link antes

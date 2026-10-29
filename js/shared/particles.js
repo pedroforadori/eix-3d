@@ -1,4 +1,4 @@
-// Fluxos: partículas correndo por curvas. Usado pelo tour 3D e pelas fotos.
+// Fluxos: partículas (e setas) correndo por curvas. Usado pelo tour 3D e pelas fotos.
 import * as THREE from "three";
 
 export const rnd = (a, b) => a + Math.random() * (b - a);
@@ -53,4 +53,44 @@ export function writeParticles(seeds, geo, travel, { edge, floor }) {
     col[i * 3] = tmp.r; col[i * 3 + 1] = tmp.g; col[i * 3 + 2] = tmp.b;
   });
   geo.attributes.position.needsUpdate = true; geo.attributes.color.needsUpdate = true;
+}
+
+// Setas que deslizam ao longo dos caminhos junto com as partículas, para mostrar o sentido do fluxo.
+// Uma seta a cada `spacing` de comprimento, em 1 de cada `every` caminhos. flat = seta plana no plano XY
+// (em cima das fotos); senão, cone 3D. A cor segue a transição c0 → c1. Devolve { mesh, update(travel) }.
+const UP = new THREE.Vector3(0, 1, 0), Z = new THREE.Vector3(0, 0, 1);
+function flatArrow(size) { // seta plana apontando para +y
+  const s = new THREE.Shape(), h = size / 2, w = size * 0.5, stem = size * 0.18;
+  s.moveTo(0, h); s.lineTo(w, -0.1 * size); s.lineTo(stem, -0.1 * size); s.lineTo(stem, -h);
+  s.lineTo(-stem, -h); s.lineTo(-stem, -0.1 * size); s.lineTo(-w, -0.1 * size); s.closePath();
+  return new THREE.ShapeGeometry(s);
+}
+export function arrowMarkers(paths, { every = 3, spacing, size, flat = false }) {
+  const marks = [];
+  paths.forEach((p, i) => {
+    if (i % every) return;
+    const n = Math.max(1, Math.round(p.len / spacing));
+    for (let k = 0; k < n; k++) marks.push({ p, off: (k + 0.5) / n });
+  });
+  const geo = flat ? flatArrow(size) : new THREE.ConeGeometry(size * 0.42, size, 12);
+  const mesh = new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide }), marks.length);
+  mesh.frustumCulled = false; mesh.renderOrder = 11;
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), pos = new THREE.Vector3(), dir = new THREE.Vector3(), scl = new THREE.Vector3(), col = new THREE.Color();
+  function update(travel) {
+    marks.forEach((s, i) => {
+      const p = s.p, u = (s.off + travel / p.len) % 1;
+      const f = u * (p.lut.length - 1), i0 = Math.min(Math.floor(f), p.lut.length - 2), a = p.lut[i0], b = p.lut[i0 + 1];
+      pos.lerpVectors(a, b, f - i0); dir.subVectors(b, a);
+      if (flat) q.setFromAxisAngle(Z, Math.atan2(dir.y, dir.x) - Math.PI / 2);
+      else q.setFromUnitVectors(UP, dir.normalize());
+      scl.setScalar(Math.max(0.001, Math.min(1, u * 6, (1 - u) * 6))); // cresce e some nas pontas
+      mesh.setMatrixAt(i, m.compose(pos, q, scl));
+      const k = THREE.MathUtils.clamp((u - p.range[0]) / (p.range[1] - p.range[0]), 0, 1);
+      mesh.setColorAt(i, col.copy(p.c0).lerp(p.c1, k));
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  }
+  update(0);
+  return { mesh, update };
 }

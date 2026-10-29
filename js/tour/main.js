@@ -63,11 +63,11 @@ function setMode(m) {
   applyFlows();
   setHash(hashKey());
 }
-// #passo-0 a #passo-5 ou #ciclo, vindos de um link direto
+// #passo-0 a #passo-N ou #ciclo, vindos de um link direto
 function route(h) {
-  const m = /^#passo-([0-5])$/.exec(h);
+  const m = /^#passo-(\d+)$/.exec(h);
   if (h === "#ciclo") setMode("all");
-  else if (m) { setMode("steps"); go(+m[1]); }
+  else if (m && +m[1] < STEPS.length) { setMode("steps"); go(+m[1]); }
 }
 $("mode-steps").addEventListener("click", () => setMode("steps"));
 $("mode-all").addEventListener("click", () => setMode("all"));

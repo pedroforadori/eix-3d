@@ -42,8 +42,8 @@ export const STRINGS = {
   camOn: { pt: "Câmera ligada", en: "Camera on" },
   camPoint: { pt: "Aponte para uma das fotos", en: "Point at one of the photos" },
   camHelp: {
-    pt: "Mostre na tela ou no slide uma das 4 fotos (telhado, chiller, sala ou corredor quente). Os fluxos aparecem em cima dela.",
-    en: "Show one of the 4 photos (roof, chiller, room or hot aisle) on a screen or slide. The flows appear on top of it.",
+    pt: "Mostre na tela ou no slide uma das 6 fotos (telhado, chiller, sala, corredor quente, CRAH em corte ou corte do prédio). Os fluxos aparecem em cima dela.",
+    en: "Show one of the 6 photos (roof, chiller, room, hot aisle, CRAH cutaway or building section) on a screen or slide. The flows appear on top of it.",
   },
   camOpening: { pt: "Abrindo a câmera...", en: "Opening the camera..." },
   camError: {
