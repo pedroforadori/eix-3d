@@ -1,10 +1,10 @@
-// Painel do passo: textos, temperaturas, pontinhos e Anterior/Próximo.
+// Painel do passo: textos, temperaturas, vídeos, pontinhos e Anterior/Próximo.
 import { $ } from "../shared/dom.js";
 import { tr } from "../shared/i18n.js";
 import { STRINGS } from "../shared/strings.js";
 
-// go(i) é chamado quando o usuário pede outro passo; render(i) mostra o passo i.
-export function createPanel(steps, { go }) {
+// go(i) é chamado quando o usuário pede outro passo; render(i) mostra o passo i; videos(el, chaves) põe os botões dos vídeos.
+export function createPanel(steps, { go, videos }) {
   let current = 0;
   const dots = $("dots");
   steps.forEach((s, i) => {
@@ -19,6 +19,7 @@ export function createPanel(steps, { go }) {
     const s = steps[i];
     $("eyebrow").textContent = tr(s.eyebrow); $("title").textContent = tr(s.title); $("text").textContent = tr(s.text);
     $("temps").innerHTML = s.temps.map(([a, b]) => `<span>${tr(a)} <b>${b}</b></span>`).join("");
+    videos($("videos"), s.videos);
     $("prev").disabled = i === 0;
     $("next").textContent = tr(i === steps.length - 1 ? STRINGS.restart : STRINGS.next);
     [...dots.children].forEach((d, k) => {

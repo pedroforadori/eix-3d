@@ -12,6 +12,7 @@
   --water: #3f8cff;       /* água gelada */
   --return: #ff4d3d;      /* água de retorno */
   --outside: #c4d0d6;     /* ar da rua */
+  --cond: #ffc93d;        /* água do condensador (torres) */
   --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -69,6 +70,42 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cold); outline-
 }
 .btn.primary { background: var(--cold); border-color: var(--cold); color: #04212b; }
 .btn:disabled { opacity: .35; cursor: default; }
+
+/* botões dos vídeos no painel e a janela do vídeo (js/shared/videos.js) */
+.videos { display: flex; flex-wrap: wrap; gap: 6px; }
+.video-btn {
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  font: 600 13px/1 var(--body); color: var(--ink); background: transparent;
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+}
+.video-btn svg { width: 14px; height: 14px; fill: var(--hot); flex: none; }
+.video-btn small { font: 500 11px/1 var(--mono); color: var(--muted); }
+.video-btn:hover { border-color: var(--muted); }
+.video {
+  border: 0; padding: 0; background: none; color: var(--ink); max-width: none; max-height: none;
+}
+.video::backdrop { background: rgba(4, 10, 12, .78); }
+.video-box {
+  display: grid; gap: 10px; width: min(380px, calc(100vw - 32px));
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px 14px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.5);
+}
+.video-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.video-head h3 { margin: 0; font: 700 20px/1.1 var(--display); text-transform: uppercase; }
+.video-close {
+  flex: none; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 50%; background: none; color: var(--ink);
+}
+.video-close svg { width: 16px; height: 16px; stroke: currentColor; }
+/* Shorts são verticais (9:16); a altura cabe na tela junto com o texto */
+.video-frame {
+  aspect-ratio: 9 / 16; justify-self: center;
+  height: min(calc((min(380px, 100vw - 32px) - 28px) * 16 / 9), calc(100dvh - 230px));
+  background: #000; border-radius: 10px; overflow: hidden;
+}
+.video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.video-note { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.video-link { font: 500 12px/1 var(--mono); color: var(--cold); justify-self: start; }
 
 @media (max-width: 640px) {
   .top { align-items: center; flex-wrap: nowrap; }

@@ -7,6 +7,7 @@ import { initCard } from "../shared/card.js";
 import { setHash, onHashChange } from "../shared/hash.js";
 import { initI18n, onLangChange } from "../shared/i18n.js";
 import { STRINGS } from "../shared/strings.js";
+import { initVideos } from "../shared/videos.js";
 import { GROUND } from "../shared/palette.js";
 import { STEPS } from "./steps.js";
 import { buildBuilding } from "./building.js";
@@ -45,7 +46,7 @@ rig.place(STEPS[0].cam, STEPS[0].target);
 
 // ---------- Tour ----------
 let step = 0, mode = "steps";
-const panel = createPanel(STEPS, { go });
+const panel = createPanel(STEPS, { go, videos: initVideos() });
 const hashKey = () => (mode === "all" ? "ciclo" : "passo-" + step);
 const applyFlows = () => flows.setActive(mode === "all" ? flows.names : STEPS[step].flows);
 

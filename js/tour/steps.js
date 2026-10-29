@@ -34,7 +34,7 @@ export const STEPS = [
       en: "Hot return air enters the top of the CRAH, goes through the filter and crosses the cooling coil. The chilled water running inside the coil absorbs the heat, so the air comes out cold. The fans underneath push it down into the raised floor.",
     },
     temps: [[{ pt: "Ar que entra", en: "Air in" }, "≈ 35 °C"], [{ pt: "Ar que sai", en: "Air out" }, "≈ 18 °C"], [{ pt: "Água", en: "Water" }, "7 → 12 °C"]],
-    flows: ["crah", "coil"],
+    flows: ["crah", "coil"], videos: ["crah", "crac"],
     cam: [-2.2, 3.9, 6.4], target: [-7.4, 1.8, 0], roof: false, ceil: false, labels: ["crah", "coil", "fans"],
   },
   {

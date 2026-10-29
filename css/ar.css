@@ -25,5 +25,9 @@
 
 @media (max-width: 640px) {
   .card { padding: 12px 14px; }
+  /* com 11 fotos as abas viram uma faixa que rola de lado */
+  .tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -14px; padding: 0 14px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button { flex: none; }
   .card h2 { font-size: 21px; }
 }

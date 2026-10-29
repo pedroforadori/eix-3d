@@ -10,6 +10,9 @@ export const STRINGS = {
   next: { pt: "Próximo", en: "Next" },
   restart: { pt: "Recomeçar", en: "Start over" },
   details: { pt: "Mostrar detalhes", en: "Show details" },
+  close: { pt: "Fechar", en: "Close" },
+  videos: { pt: "Vídeos", en: "Videos" },
+  openYoutube: { pt: "Abrir no YouTube", en: "Open on YouTube" },
 
   // tour 3D
   tourDocTitle: { pt: "Tour do resfriamento", en: "Cooling tour" },
@@ -24,6 +27,7 @@ export const STRINGS = {
   flowHot: { pt: "Ar quente", en: "Hot air" },
   flowWater: { pt: "Água gelada", en: "Chilled water" },
   flowRet: { pt: "Água de retorno", en: "Return water" },
+  flowCond: { pt: "Água do condensador", en: "Condenser water" },
   loading: { pt: "Carregando a cena 3D...", en: "Loading the 3D scene..." },
   tourNote: {
     pt: "Arraste para girar · pinça ou roda para aproximar · temperaturas típicas, ilustrativas",
@@ -42,8 +46,8 @@ export const STRINGS = {
   camOn: { pt: "Câmera ligada", en: "Camera on" },
   camPoint: { pt: "Aponte para uma das fotos", en: "Point at one of the photos" },
   camHelp: {
-    pt: "Mostre na tela ou no slide uma das 6 fotos (telhado, chiller, sala, corredor quente, CRAH em corte ou corte do prédio). Os fluxos aparecem em cima dela.",
-    en: "Show one of the 6 photos (roof, chiller, room, hot aisle, CRAH cutaway or building section) on a screen or slide. The flows appear on top of it.",
+    pt: "Mostre na tela ou no slide uma das fotos da apresentação (chillers, sala, CRAH, casa de máquinas ou torres). Os fluxos aparecem em cima dela.",
+    en: "Show one of the presentation photos (chillers, room, CRAH, plant room or towers) on a screen or slide. The flows appear on top of it.",
   },
   camOpening: { pt: "Abrindo a câmera...", en: "Opening the camera..." },
   camError: {

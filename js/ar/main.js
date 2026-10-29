@@ -5,6 +5,7 @@ import { initCard } from "../shared/card.js";
 import { setHash, onHashChange } from "../shared/hash.js";
 import { initI18n, onLangChange } from "../shared/i18n.js";
 import { STRINGS } from "../shared/strings.js";
+import { initVideos } from "../shared/videos.js";
 import { TARGETS } from "./targets.js";
 import { createPanel } from "./panel.js";
 import { createDemoView } from "./demo-view.js";
@@ -13,7 +14,7 @@ import { createCameraView } from "./camera-view.js";
 initI18n(STRINGS, $("lang"));
 
 let current = 0, mode = "demo";
-const panel = createPanel(TARGETS, { select });
+const panel = createPanel(TARGETS, { select, videos: initVideos() });
 const views = {
   demo: createDemoView($("demo"), TARGETS),
   ar: createCameraView($("ar"), TARGETS, {

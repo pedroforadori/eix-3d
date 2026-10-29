@@ -1,11 +1,11 @@
-// Painel da foto: textos (PT/EN), legenda, abas, Anterior/Próximo e mensagens da câmera.
+// Painel da foto: textos (PT/EN), legenda, vídeos, abas, Anterior/Próximo e mensagens da câmera.
 import { $ } from "../shared/dom.js";
 import { FLOW_LABELS } from "../shared/palette.js";
 import { tr } from "../shared/i18n.js";
 import { STRINGS } from "../shared/strings.js";
 
-// select(i) é chamado quando o usuário escolhe uma aba ou usa Anterior/Próximo.
-export function createPanel(targets, { select }) {
+// select(i) é chamado quando o usuário escolhe uma aba ou usa Anterior/Próximo; videos(el, chaves) põe os botões dos vídeos.
+export function createPanel(targets, { select, videos }) {
   let current = 0, view = "photo", msg = ["", false];
   targets.forEach((t, i) => {
     const b = document.createElement("button");
@@ -20,9 +20,11 @@ export function createPanel(targets, { select }) {
     $("eyebrow").textContent = tr(STRINGS.photoOf).replace("{i}", i + 1).replace("{n}", targets.length);
     $("title").textContent = tr(t.title); $("text").textContent = tr(t.text);
     $("legend").innerHTML = t.legend.map(k => `<span><i style="background:${FLOW_LABELS[k][1]}"></i>${tr(FLOW_LABELS[k][0])}</span>`).join("");
+    videos($("videos"), t.videos);
     [...$("tabs").children].forEach((b, k) => {
       b.textContent = tr(targets[k].tab); b.setAttribute("aria-pressed", k === i ? "true" : "false");
     });
+    $("tabs").children[i].scrollIntoView({ block: "nearest", inline: "nearest" }); // no celular as abas rolam de lado
     $("prev").disabled = i === 0;
     $("next").textContent = tr(i === targets.length - 1 ? STRINGS.restart : STRINGS.next);
   }
@@ -32,6 +34,7 @@ export function createPanel(targets, { select }) {
     $("title").textContent = tr(STRINGS.camPoint);
     $("text").textContent = tr(STRINGS.camHelp);
     $("legend").innerHTML = "";
+    videos($("videos"));
   }
   // no modo câmera quem escolhe a foto é a câmera, então abas e Anterior/Próximo somem
   const setTabsHidden = hidden => { $("tabs").hidden = hidden; $("nav").hidden = hidden; };

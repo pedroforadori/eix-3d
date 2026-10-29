@@ -65,6 +65,7 @@
     <div class="card-more" id="card-more">
       <p id="text"></p>
       <div class="temps" id="temps"></div>
+      <div class="videos" id="videos" role="group" hidden></div>
     </div>
     <div class="nav">
       <button class="btn" id="prev" data-i18n="prev">Previous</button>
@@ -74,6 +75,18 @@
     <div class="note" data-i18n="tourNote">Drag to rotate · pinch or scroll to zoom · typical temperatures, for illustration only</div>
   </div>
 </section>
+
+<dialog class="video" id="video" aria-labelledby="video-title">
+  <div class="video-box">
+    <div class="video-head">
+      <h3 id="video-title"></h3>
+      <button class="video-close" id="video-close" aria-label="Close" data-i18n-aria="close"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="video-frame" id="video-frame"></div>
+    <p class="video-note" id="video-note"></p>
+    <a class="video-link" id="video-link" href="#" target="_blank" rel="noopener" data-i18n="openYoutube">Open on YouTube</a>
+  </div>
+</dialog>
 
 
 <script type="importmap">
